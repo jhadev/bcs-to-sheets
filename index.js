@@ -32,7 +32,7 @@ const prompt = [
   },
   {
     type: 'input',
-    name: 'selection',
+    name: 'selectionChoice',
     message: 'Enter your sheet selection range in this format - Sheet1!A1:B',
     validate: input => (typeof input === 'string' ? true : false),
     when: answer =>
@@ -51,13 +51,14 @@ const prompt = [
 ];
 
 const runPrompt = async () => {
-  const { doChoice, assignmentChoice, selection } = await inquirer.prompt(
+  const { doChoice, assignmentChoice, selectionChoice } = await inquirer.prompt(
     prompt
   );
-  selectionRange = selection;
-  if (doChoice) {
-    homeworkTitle = assignmentChoice;
-  }
+
+  selectionRange = selectionChoice;
+
+  homeworkTitle = assignmentChoice;
+
   try {
     switch (doChoice) {
       case 'Get A Token From Google':
@@ -130,7 +131,11 @@ const getGrades = async () => {
     const { data } = response;
     grades = data
       .filter(({ assignmentTitle }) => homeworkTitle === assignmentTitle)
-      .map(({ studentName, grade }) => [studentName, grade]);
+      .map(({ studentName, grade, assignmentTitle }) => [
+        studentName,
+        grade,
+        assignmentTitle
+      ]);
     verify(printGradesToSheets);
   } catch (err) {
     console.log(err);
@@ -142,7 +147,7 @@ const printGradesToSheets = auth => {
   // const mapStudentToGrade = new Map(grades);
   // console.log(mapStudentToGrade);
 
-  const header = ['Student Name', 'Grade'];
+  const header = ['Student Name', 'Grade', 'Assignment'];
   grades.unshift(header);
 
   // define sheet options here
@@ -187,10 +192,12 @@ const readFromSheet = auth => {
         // only prints 2 rows at the moment
         rows.map(row => {
           row.length === 1 ? (row.length = 2) && (row[1] = 'Ungraded') : null;
-          const [name, grade] = row;
-          row = { name, grade };
+          const [name, grade, assignment] = row;
+          row = { name, grade, assignment };
           homeworkTitle !== undefined ? console.log(homeworkTitle) : null;
-          console.log(`==============================`);
+          console.log(
+            `=================================================================`
+          );
           console.table(row);
         });
         console.log(`Rows: ${rows.length}`);

@@ -12,7 +12,7 @@ Navigate to Google Sheets API [reference page](https://developers.google.com/she
 2. When the modal opens, click the DOWNLOAD CLIENT CONFIGURATION button. This will download a file named 'credentials.json'
 3. Move 'credentials.json' to the root of the project directory.
 
-4. Create a .env file in the root of the project and add these fields
+4. Create a .env file in the root of the project and add these fields:
 
    - EMAIL=YOUR BOOTCAMPSPOT EMAIL
    - BCS_PASSWORD=YOUR BOOTCAMPSPOT PASSWORD
