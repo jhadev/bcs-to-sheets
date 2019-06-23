@@ -20,26 +20,39 @@ const prompt = [
     type: 'list',
     name: 'choices',
     message: 'What would you like to do?',
-    choices: ['Read from Google Sheets', 'Write To Google Sheets', 'Quit']
+    choices: [
+      'Read from Google Sheets',
+      'Write To Google Sheets',
+      'Write And Verify',
+      'Quit'
+    ]
   }
 ];
 
-inquirer.prompt(prompt).then(answers => {
-  //use switch case to choose which functions to run
-  switch (answers.choices) {
-    case 'Read from Google Sheets':
-      verify(readFromSheet);
-      break;
-    case 'Write To Google Sheets':
-      getGrades();
-      break;
-    case 'Quit':
-      process.exit();
-      break;
-    default:
-      console.log('Hi');
+const runPrompt = async () => {
+  const answers = await inquirer.prompt(prompt);
+  try {
+    switch (answers.choices) {
+      case 'Read from Google Sheets':
+        verify(readFromSheet);
+        break;
+      case 'Write To Google Sheets':
+        getGrades();
+        break;
+      case 'Write And Verify':
+        // get grades from bcs, update sheets, then read back sheet file.
+        getGrades().then(() => verify(readFromSheet));
+        break;
+      case 'Quit':
+        process.exit();
+        break;
+      default:
+        console.log('Hi');
+    }
+  } catch (err) {
+    console.log(err);
   }
-});
+};
 
 const verify = callback =>
   fs.readFile('credentials.json', (err, content) => {
@@ -94,8 +107,8 @@ const getGrades = async () => {
 
 const printGradesToSheets = auth => {
   // just messing around has no use at the moment.
-  const mapStudentToGrade = new Map(grades);
-  console.log(mapStudentToGrade);
+  // const mapStudentToGrade = new Map(grades);
+  // console.log(mapStudentToGrade);
 
   // define sheet options here
   const options = {
@@ -138,8 +151,12 @@ const readFromSheet = auth => {
         rows.map(row => {
           row.length === 1 ? (row.length = 2) && (row[1] = 'Ungraded') : null;
           const [name, grade] = row;
-          console.log(`${name}, ${grade}`);
+          row = { name, grade };
+          console.log(homeworkTitle);
+          console.log(`==============================`);
+          console.table(row);
         });
+        console.log(`Rows: ${rows.length}`);
       } else {
         console.log('No data found.');
       }
@@ -149,5 +166,4 @@ const readFromSheet = auth => {
 
 // RUN
 
-// get grades from bcs, update sheets, then read back sheet file.
-// getGrades().then(() => verify(readFromSheet));
+runPrompt();
