@@ -15,17 +15,29 @@ import inquirer from 'inquirer';
 
 let grades = [];
 let homeworkTitle = '';
+let selectionRange = '';
+
 const prompt = [
   {
     type: 'list',
     name: 'doChoice',
     message: 'What would you like to do?',
     choices: [
+      'Get A Token From Google',
       'Read from Google Sheets',
       'Write To Google Sheets',
       'Write And Verify',
       'Quit'
     ]
+  },
+  {
+    type: 'input',
+    name: 'selection',
+    message: 'Enter your sheet selection range in this format - Sheet1!A1:B',
+    validate: input => (typeof input === 'string' ? true : false),
+    when: answer =>
+      answer.doChoice !== 'Quit' &&
+      answer.doChoice !== 'Get A Token From Google'
   },
   {
     type: 'list',
@@ -39,12 +51,17 @@ const prompt = [
 ];
 
 const runPrompt = async () => {
-  const answers = await inquirer.prompt(prompt);
-  if (answers.doChoice) {
-    homeworkTitle = answers.assignmentChoice;
+  const { doChoice, assignmentChoice, selection } = await inquirer.prompt(
+    prompt
+  );
+  selectionRange = selection;
+  if (doChoice) {
+    homeworkTitle = assignmentChoice;
   }
   try {
-    switch (answers.doChoice) {
+    switch (doChoice) {
+      case 'Get A Token From Google':
+        verify(tokenCreated);
       case 'Read from Google Sheets':
         verify(readFromSheet);
         break;
@@ -74,6 +91,8 @@ const verify = callback => {
   });
 };
 
+const tokenCreated = () => console.log('token.json has been created');
+
 // request an authToken from BCS
 const login = async () => {
   const response = await axios.post(
@@ -94,7 +113,7 @@ const login = async () => {
 // await token and request grades for specific class via courseId
 const getGrades = async () => {
   const authToken = await login();
-  console.log(authToken);
+  console.log(`BCS AUTH TOKEN: ${authToken}`);
   const response = await axios.post(
     'https://bootcampspot.com/api/instructor/v1/grades',
     {
@@ -123,13 +142,13 @@ const printGradesToSheets = auth => {
   // const mapStudentToGrade = new Map(grades);
   // console.log(mapStudentToGrade);
 
-  const header = ['Student Name', homeworkTitle];
+  const header = ['Student Name', 'Grade'];
   grades.unshift(header);
 
   // define sheet options here
   const options = {
     spreadsheetId,
-    range: 'Sheet1!A1:B', //Change Sheet1 if your worksheet's name is something else
+    range: selectionRange, //Change Sheet1 if your worksheet's name is something else
     valueInputOption: 'USER_ENTERED',
     // insertDataOption: 'OVERWRITE', //INSERT_ROWS
     responseValueRenderOption: 'FORMATTED_VALUE',
@@ -145,8 +164,9 @@ const printGradesToSheets = auth => {
       console.log(`The API returned an error: ${err}`);
       return;
     } else {
+      console.log(`Selected Homework: ${homeworkTitle}`);
       console.log(grades);
-      console.log('Appended');
+      console.log('Sheet updated!');
     }
   });
 };
@@ -156,21 +176,20 @@ const readFromSheet = auth => {
   sheets.spreadsheets.values.get(
     {
       spreadsheetId,
-      range: 'Sheet1!A2:B' //Change Sheet1 if your worksheet's name is something else
+      range: selectionRange //Change Sheet1 if your worksheet's name is something else
     },
     (err, response) => {
       if (err) {
-        throw new Error('API crapped out');
+        return console.log(err.errors);
       }
       const rows = response.data.values;
       if (rows.length) {
-        console.log(homeworkTitle);
-        // Print columns A and E, which correspond to indices 0 and 4.
+        // only prints 2 rows at the moment
         rows.map(row => {
           row.length === 1 ? (row.length = 2) && (row[1] = 'Ungraded') : null;
           const [name, grade] = row;
           row = { name, grade };
-          console.log(homeworkTitle);
+          homeworkTitle !== undefined ? console.log(homeworkTitle) : null;
           console.log(`==============================`);
           console.table(row);
         });
