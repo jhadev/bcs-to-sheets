@@ -1,24 +1,24 @@
 import fs from 'fs';
+import readline from 'readline';
 import { google } from 'googleapis';
 import axios from 'axios';
+import { get } from 'http';
 import {
   email,
   password,
-  homeworkTitle,
+  assignments,
   courseId,
   spreadsheetId
 } from './utils/config';
 import { authorize, getNewToken } from './utils/auth';
 import inquirer from 'inquirer';
-// import readline from 'readline';
-// import { get } from 'http';
 
 let grades = [];
-
+let homeworkTitle = '';
 const prompt = [
   {
     type: 'list',
-    name: 'choices',
+    name: 'doChoice',
     message: 'What would you like to do?',
     choices: [
       'Read from Google Sheets',
@@ -26,13 +26,25 @@ const prompt = [
       'Write And Verify',
       'Quit'
     ]
+  },
+  {
+    type: 'list',
+    name: 'assignmentChoice',
+    message: 'Which assignment would you like to send to Google Sheets?',
+    choices: assignments,
+    when: answer =>
+      answer.doChoice === 'Write To Google Sheets' ||
+      answer.doChoice === 'Write And Verify'
   }
 ];
 
 const runPrompt = async () => {
   const answers = await inquirer.prompt(prompt);
+  if (answers.doChoice) {
+    homeworkTitle = answers.assignmentChoice;
+  }
   try {
-    switch (answers.choices) {
+    switch (answers.doChoice) {
       case 'Read from Google Sheets':
         verify(readFromSheet);
         break;
@@ -95,13 +107,11 @@ const getGrades = async () => {
     }
   );
   try {
-    // data comes back as grades for every student and every homework
+    // filter from
     const { data } = response;
-    // filter by homework title and map only student name and grade to a key value pair as an array
     grades = data
       .filter(({ assignmentTitle }) => homeworkTitle === assignmentTitle)
       .map(({ studentName, grade }) => [studentName, grade]);
-    // run auth check and send data to sheets to write
     verify(printGradesToSheets);
   } catch (err) {
     console.log(err);
@@ -109,22 +119,28 @@ const getGrades = async () => {
 };
 
 const printGradesToSheets = auth => {
+  // just messing around has no use at the moment.
   // const mapStudentToGrade = new Map(grades);
   // console.log(mapStudentToGrade);
+
+  const header = ['Student Name', homeworkTitle];
+  grades.unshift(header);
 
   // define sheet options here
   const options = {
     spreadsheetId,
-    range: 'Sheet1!A2:B', //Change Sheet1 if your worksheet's name is something else
+    range: 'Sheet1!A1:B', //Change Sheet1 if your worksheet's name is something else
     valueInputOption: 'USER_ENTERED',
-    insertDataOption: 'OVERWRITE', //INSERT_ROWS
+    // insertDataOption: 'OVERWRITE', //INSERT_ROWS
+    responseValueRenderOption: 'FORMATTED_VALUE',
     resource: {
       values: grades
     }
   };
 
   const sheets = google.sheets({ version: 'v4', auth });
-  sheets.spreadsheets.values.append(options, (err, response) => {
+  // UPDATE WILL OVERWRITE EXISTING FIELDS BUT NOW CREATE NEW ROWS.
+  sheets.spreadsheets.values.update(options, (err, response) => {
     if (err) {
       console.log(`The API returned an error: ${err}`);
       return;
