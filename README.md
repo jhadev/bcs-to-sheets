@@ -7,29 +7,28 @@ Run npm install.
 
 Navigate to Google Sheets API [reference page](https://developers.google.com/sheets/api/quickstart/nodejs)
 
-Click on ENABLE THE GOOGLE SHEETS API in Step 1 shown on that page.
-When the modal opens, click the DOWNLOAD CLIENT CONFIGURATION button.
-This will download a file named 'credentials.json'
-Move 'credentials.json' to the root of the project directory.
+1. Click on ENABLE THE GOOGLE SHEETS API in Step 1 shown on that page.
+2. When the modal opens, click the DOWNLOAD CLIENT CONFIGURATION button. This will download a file named 'credentials.json'
+3. Move 'credentials.json' to the root of the project directory.
 
-Create a .env file in the root of the project and add these fields
+4. Create a .env file in the root of the project and add these fields
 
 - EMAIL=YOUR BOOTCAMPSPOT EMAIL
 - BCS_PASSWORD=YOUR BOOTCAMPSPOT PASSWORD
 - SHEET=LINK TO YOUR GOOGLE SHEET ex: sj7r-LuSE8mbV6lktPgmW7KUbbdlpeEIi0I1lUsSBgo
 - COURSE=COURSEID NUMBER FOUND IN BCS API RESPONSE
 
-Run npm start from the root of the project.
+5. Run npm start from the root of the project.
 
-You should see an inquirer prompt, select the option to 'Get A Token From Google'
-Follow the instructions printed on the command line.
-You should receive a code from google to paste back into the command line.
-If successful, 'token.json' will be created in the root on the project.
-DO NOT DELETE THIS FILE - unless you want to get a new token for some reason.
+- You should see an inquirer prompt, select the option to 'Get A Token From Google'
+- Follow the instructions printed on the command line.
+- You should receive a code from google to paste back into the command line.
+- If successful, 'token.json' will be created in the root on the project.
+- DO NOT DELETE THIS FILE - unless you want to get a new token for some reason.
 
 Once you have 'token.json' in your project you now have read/write access for Google Sheets.
 
-Run npm start again and choose your option.
+Setup is done! Run npm start again and choose your option.
 
 - 'Read from Google Sheets':
 
