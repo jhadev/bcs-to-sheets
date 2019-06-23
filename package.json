@@ -14,7 +14,8 @@
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "dotenv": "^8.0.0",
-    "googleapis": "^39.2.0"
+    "googleapis": "^39.2.0",
+    "inquirer": "^6.4.1"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.4.5"
