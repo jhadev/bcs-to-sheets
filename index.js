@@ -1,8 +1,6 @@
 import fs from 'fs';
-import readline from 'readline';
 import { google } from 'googleapis';
 import axios from 'axios';
-import { get } from 'http';
 import {
   email,
   password,
@@ -12,6 +10,8 @@ import {
 } from './utils/config';
 import { authorize, getNewToken } from './utils/auth';
 import inquirer from 'inquirer';
+// import readline from 'readline';
+// import { get } from 'http';
 
 let grades = [];
 
@@ -54,12 +54,13 @@ const runPrompt = async () => {
   }
 };
 
-const verify = callback =>
+const verify = callback => {
   fs.readFile('credentials.json', (err, content) => {
     if (err) return console.log('Error loading client secret file:', err);
     // Authorize a client with credentials, then call the Google Sheets API.
     authorize(JSON.parse(content), callback);
   });
+};
 
 // request an authToken from BCS
 const login = async () => {
@@ -94,11 +95,13 @@ const getGrades = async () => {
     }
   );
   try {
-    // filter from
+    // data comes back as grades for every student and every homework
     const { data } = response;
+    // filter by homework title and map only student name and grade to a key value pair as an array
     grades = data
       .filter(({ assignmentTitle }) => homeworkTitle === assignmentTitle)
       .map(({ studentName, grade }) => [studentName, grade]);
+    // run auth check and send data to sheets to write
     verify(printGradesToSheets);
   } catch (err) {
     console.log(err);
@@ -106,7 +109,6 @@ const getGrades = async () => {
 };
 
 const printGradesToSheets = auth => {
-  // just messing around has no use at the moment.
   // const mapStudentToGrade = new Map(grades);
   // console.log(mapStudentToGrade);
 
