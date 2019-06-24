@@ -182,7 +182,7 @@ const writeGradesToSheets = auth => {
       return;
     } else {
       console.log(`Selected Homework: ${homeworkTitle}`);
-      console.log(grades);
+      console.table(grades);
       console.log('Sheet updated!');
     }
   });
@@ -209,9 +209,10 @@ const readFromSheet = auth => {
           console.log(
             `=================================================================`
           );
-          console.table(row);
+          console.log(row);
         });
         console.log(`Rows: ${rows.length}`);
+        console.table(rows);
       } else {
         console.log('No data found.');
       }

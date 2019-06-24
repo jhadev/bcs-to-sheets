@@ -15,7 +15,7 @@ Navigate to Google Sheets API [reference page](https://developers.google.com/she
 4. Create a .env file in the root of the project and add these fields:
 
    - EMAIL=_Your Bootcampspot email_
-   - BCS_PASSWORD=_Your Bootcampspot password_
+   - BCS*PASSWORD=\_Your Bootcampspot password*
    - SHEET=_Google Sheet ID ex: sj7r-LuSE8mbV6lktPgmW7KUbbdlpeEIi0I1lUsSBgo (Can be found in sheet url)_
    - COURSE=_Course ID Number (Found in BCS API call usually a 4 digit number)_
 
@@ -29,7 +29,7 @@ Navigate to Google Sheets API [reference page](https://developers.google.com/she
      > The OAuth consent screen that is presented to the user may show the warning "This app isn't verified" if it is requesting scopes that provide access to sensitive user data. During the development phase you can continue past this warning by clicking Advanced > Go to {Project Name} (unsafe).
 
    - You should receive a code from google to paste back into the command line.
-   - If successful, 'token.json' will be created in the root on the project.
+   - If successful, 'token.json' will be created in the root of the project.
    - DO NOT DELETE THIS FILE - unless you want to get a new token for some reason.
 
 Once you have 'token.json' in your project you now have read/write access for Google Sheets.
