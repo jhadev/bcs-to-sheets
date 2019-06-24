@@ -23,6 +23,11 @@ Navigate to Google Sheets API [reference page](https://developers.google.com/she
 
    - You should see an inquirer prompt, select the option to 'Get A Token From Google'
    - Follow the instructions printed on the command line.
+
+     **The app isn't verified warning.**
+
+     > The OAuth consent screen that is presented to the user may show the warning "This app isn't verified" if it is requesting scopes that provide access to sensitive user data. During the development phase you can continue past this warning by clicking Advanced > Go to {Project Name} (unsafe).
+
    - You should receive a code from google to paste back into the command line.
    - If successful, 'token.json' will be created in the root on the project.
    - DO NOT DELETE THIS FILE - unless you want to get a new token for some reason.
@@ -37,7 +42,7 @@ Setup is done! Run npm start again and choose your option.
 
 - 'Write To Google Sheets':
 
-  This fetches an authorization token from Bootcampspot, finds your specific course by the Course ID provided in the .env, fetches grades for your selected homework, then writes them to the sheet and range you provided in the prompt. This does not append new values to the sheet, it either updates existing fields in the range provided or creates them if they don't exist. It also creates headers for the columns (Student Name, Grade) so you can start the range at the top row.
+  This fetches an authorization token from Bootcampspot, finds your specific course by the Course ID provided in the .env, fetches grades for your selected homework, then writes them to the sheet and range you provided in the prompt. This does not append new values to the sheet, it either updates existing fields in the range provided or creates them if they don't exist. It also creates headers for the columns (Student Name, Grade, Assignment) so you can start the range at the top row.
 
 - 'Write And Verify':
 

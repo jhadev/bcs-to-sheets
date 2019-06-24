@@ -32,8 +32,17 @@ const prompt = [
   },
   {
     type: 'input',
+    name: 'sheetChoice',
+    message: 'Enter your sheet name ex: Sheet1 or Week-1',
+    validate: input => (typeof input === 'string' ? true : false),
+    when: answer =>
+      answer.doChoice !== 'Quit' &&
+      answer.doChoice !== 'Get A Token From Google'
+  },
+  {
+    type: 'input',
     name: 'selectionChoice',
-    message: 'Enter your sheet selection range in this format - Sheet1!A1:B',
+    message: 'Enter your sheet selection range in this format - A1:C',
     validate: input => (typeof input === 'string' ? true : false),
     when: answer =>
       answer.doChoice !== 'Quit' &&
@@ -51,11 +60,14 @@ const prompt = [
 ];
 
 const runPrompt = async () => {
-  const { doChoice, assignmentChoice, selectionChoice } = await inquirer.prompt(
-    prompt
-  );
+  const {
+    doChoice,
+    assignmentChoice,
+    sheetChoice,
+    selectionChoice
+  } = await inquirer.prompt(prompt);
 
-  selectionRange = selectionChoice;
+  selectionRange = `${sheetChoice}!${selectionChoice}`;
 
   homeworkTitle = assignmentChoice;
 
@@ -189,7 +201,6 @@ const readFromSheet = auth => {
       }
       const rows = response.data.values;
       if (rows.length) {
-        // only prints 2 rows at the moment
         rows.map(row => {
           row.length === 1 ? (row.length = 2) && (row[1] = 'Ungraded') : null;
           const [name, grade, assignment] = row;
