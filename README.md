@@ -14,10 +14,10 @@ Navigate to Google Sheets API [reference page](https://developers.google.com/she
 
 4. Create a .env file in the root of the project and add these fields:
 
-   - EMAIL=YOUR BOOTCAMPSPOT EMAIL
-   - BCS_PASSWORD=YOUR BOOTCAMPSPOT PASSWORD
-   - SHEET=GOOGLE SHEET ID ex: sj7r-LuSE8mbV6lktPgmW7KUbbdlpeEIi0I1lUsSBgo (Can be found in sheet url)
-   - COURSE=COURSEID NUMBER (Found in BCS API call usually a 4 digit number)
+   - EMAIL=_Your Bootcampspot email_
+   - BCS_PASSWORD=_Your Bootcampspot password_
+   - SHEET=_Google Sheet ID ex: sj7r-LuSE8mbV6lktPgmW7KUbbdlpeEIi0I1lUsSBgo (Can be found in sheet url)_
+   - COURSE=_Course ID Number (Found in BCS API call usually a 4 digit number)_
 
 5. Run npm start from the root of the project.
 

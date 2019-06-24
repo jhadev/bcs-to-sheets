@@ -9,6 +9,8 @@ const spreadsheetId = process.env.SHEET;
 // created automatically when the authorization flow completes for the first
 // time.
 const TOKEN_PATH = 'token.json';
+const loginEndpoint = 'https://bootcampspot.com/api/instructor/v1/login';
+const gradesEndpoint = 'https://bootcampspot.com/api/instructor/v1/grades';
 
 const assignments = [
   '1: Building a Wireframe / That Portfolio Though',
@@ -35,6 +37,8 @@ export {
   courseId,
   spreadsheetId,
   assignments,
+  gradesEndpoint,
+  loginEndpoint,
   SCOPES,
   TOKEN_PATH
 };

@@ -8,6 +8,8 @@ import {
   password,
   assignments,
   courseId,
+  gradesEndpoint,
+  loginEndpoint,
   spreadsheetId
 } from './utils/config';
 import { authorize, getNewToken } from './utils/auth';
@@ -108,13 +110,10 @@ const tokenCreated = () => console.log('token.json has been created');
 
 // request an authToken from BCS
 const login = async () => {
-  const response = await axios.post(
-    'https://bootcampspot.com/api/instructor/v1/login',
-    {
-      email: email,
-      password: password
-    }
-  );
+  const response = await axios.post(loginEndpoint, {
+    email,
+    password
+  });
   try {
     const { authToken } = response.data.authenticationInfo;
     return authToken;
@@ -127,8 +126,9 @@ const login = async () => {
 const getGrades = async () => {
   const authToken = await login();
   console.log(`BCS AUTH TOKEN: ${authToken}`);
+
   const response = await axios.post(
-    'https://bootcampspot.com/api/instructor/v1/grades',
+    gradesEndpoint,
     {
       courseId
     },
@@ -148,13 +148,13 @@ const getGrades = async () => {
         grade,
         assignmentTitle
       ]);
-    verify(printGradesToSheets);
+    verify(writeGradesToSheets);
   } catch (err) {
     console.log(err);
   }
 };
 
-const printGradesToSheets = auth => {
+const writeGradesToSheets = auth => {
   // just messing around has no use at the moment.
   // const mapStudentToGrade = new Map(grades);
   // console.log(mapStudentToGrade);
