@@ -14,10 +14,10 @@ import {
 } from './utils/config';
 import { authorize, getNewToken } from './utils/auth';
 import inquirer from 'inquirer';
+const tokenPath = './token.json';
 
-let grades = [];
-let homeworkTitle = '';
-let selectionRange = '';
+// query and sheet params homeworkTitle and selectionRange
+const params = {};
 
 const prompt = [
   {
@@ -28,7 +28,6 @@ const prompt = [
       'Get A Token From Google',
       'Read from Google Sheets',
       'Write To Google Sheets',
-      'Write And Verify',
       'Quit'
     ]
   },
@@ -55,9 +54,7 @@ const prompt = [
     name: 'assignmentChoice',
     message: 'Which assignment would you like to send to Google Sheets?',
     choices: assignments,
-    when: answer =>
-      answer.doChoice === 'Write To Google Sheets' ||
-      answer.doChoice === 'Write And Verify'
+    when: answer => answer.doChoice === 'Write To Google Sheets'
   }
 ];
 
@@ -69,23 +66,19 @@ const runPrompt = async () => {
     selectionChoice
   } = await inquirer.prompt(prompt);
 
-  selectionRange = `${sheetChoice}!${selectionChoice}`;
+  params.selectionRange = `${sheetChoice}!${selectionChoice}`;
 
-  homeworkTitle = assignmentChoice;
+  params.homeworkTitle = assignmentChoice;
 
   try {
     switch (doChoice) {
       case 'Get A Token From Google':
         verify(tokenCreated);
       case 'Read from Google Sheets':
-        verify(readFromSheet);
+        verify(readGradesFromSheet);
         break;
       case 'Write To Google Sheets':
-        getGrades();
-        break;
-      case 'Write And Verify':
-        // get grades from bcs, update sheets, then read back sheet file.
-        getGrades().then(() => verify(readFromSheet));
+        verify(writeGradesToSheets);
         break;
       case 'Quit':
         process.exit();
@@ -141,23 +134,26 @@ const getGrades = async () => {
   try {
     // filter from
     const { data } = response;
-    grades = data
-      .filter(({ assignmentTitle }) => homeworkTitle === assignmentTitle)
+    const grades = data
+      .filter(({ assignmentTitle }) => params.homeworkTitle === assignmentTitle)
       .map(({ studentName, grade, assignmentTitle }) => [
         studentName,
         grade,
         assignmentTitle
       ]);
-    verify(writeGradesToSheets);
+
+    return grades;
   } catch (err) {
     console.log(err);
   }
 };
 
-const writeGradesToSheets = auth => {
+const writeGradesToSheets = async auth => {
   // just messing around has no use at the moment.
   // const mapStudentToGrade = new Map(grades);
   // console.log(mapStudentToGrade);
+
+  const grades = await getGrades();
 
   const header = ['Student Name', 'Grade', 'Assignment'];
   grades.unshift(header);
@@ -165,7 +161,7 @@ const writeGradesToSheets = auth => {
   // define sheet options here
   const options = {
     spreadsheetId,
-    range: selectionRange, //Change Sheet1 if your worksheet's name is something else
+    range: params.selectionRange, //Change Sheet1 if your worksheet's name is something else
     valueInputOption: 'USER_ENTERED',
     // insertDataOption: 'OVERWRITE', //INSERT_ROWS
     responseValueRenderOption: 'FORMATTED_VALUE',
@@ -181,19 +177,23 @@ const writeGradesToSheets = auth => {
       console.log(`The API returned an error: ${err}`);
       return;
     } else {
-      console.log(`Selected Homework: ${homeworkTitle}`);
+      console.log(`Selected Homework: ${params.homeworkTitle}`);
+      console.log('LOCAL VALUES');
       console.table(grades);
       console.log('Sheet updated!');
+      console.log('SHEET VALUES');
+      console.table(response.config.data.values);
     }
+    runPrompt();
   });
 };
 
-const readFromSheet = auth => {
+const readGradesFromSheet = auth => {
   const sheets = google.sheets({ version: 'v4', auth });
   sheets.spreadsheets.values.get(
     {
       spreadsheetId,
-      range: selectionRange //Change Sheet1 if your worksheet's name is something else
+      range: params.selectionRange //Change Sheet1 if your worksheet's name is something else
     },
     (err, response) => {
       if (err) {
@@ -205,7 +205,9 @@ const readFromSheet = auth => {
           row.length === 1 ? (row.length = 2) && (row[1] = 'Ungraded') : null;
           const [name, grade, assignment] = row;
           row = { name, grade, assignment };
-          homeworkTitle !== undefined ? console.log(homeworkTitle) : null;
+          params.homeworkTitle !== undefined
+            ? console.log(params.homeworkTitle)
+            : null;
           console.log(
             `=================================================================`
           );
@@ -216,10 +218,22 @@ const readFromSheet = auth => {
       } else {
         console.log('No data found.');
       }
+      runPrompt();
     }
   );
 };
 
-// RUN
+const checkIfTokenExists = async () => {
+  try {
+    if (fs.existsSync(tokenPath)) {
+      //file exists
+      prompt[0].choices.shift();
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
 
-runPrompt();
+// RUN
+checkIfTokenExists().then(() => runPrompt());
+// runPrompt();

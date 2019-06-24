@@ -42,8 +42,4 @@ Setup is done! Run npm start again and choose your option.
 
 - 'Write To Google Sheets':
 
-  This fetches an authorization token from Bootcampspot, finds your specific course by the Course ID provided in the .env, fetches grades for your selected homework, then writes them to the sheet and range you provided in the prompt. This does not append new values to the sheet, it either updates existing fields in the range provided or creates them if they don't exist. It also creates headers for the columns (Student Name, Grade, Assignment) so you can start the range at the top row.
-
-- 'Write And Verify':
-
-  Does both commands above at once, first writes, then reads back.
+  This fetches an authorization token from Bootcampspot, finds your specific course by the Course ID provided in the .env, fetches grades for your selected homework, then writes them to the sheet and range you provided in the prompt. This does not append new values to the sheet, it either updates existing fields in the range provided or creates them if they don't exist. It also creates headers for the columns (Student Name, Grade, Assignment) so you can start the range at the top row. Both local and updated values will be printed in the console.
