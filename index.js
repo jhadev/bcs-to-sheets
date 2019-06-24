@@ -223,7 +223,7 @@ const readGradesFromSheet = auth => {
   );
 };
 
-const checkIfTokenExists = async () => {
+const checkIfTokenExists = () => {
   try {
     if (fs.existsSync(tokenPath)) {
       //file exists
@@ -235,5 +235,5 @@ const checkIfTokenExists = async () => {
 };
 
 // RUN
-checkIfTokenExists().then(() => runPrompt());
-// runPrompt();
+checkIfTokenExists();
+runPrompt();
