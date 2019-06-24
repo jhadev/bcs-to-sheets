@@ -189,6 +189,8 @@ const checkIfTokenExists = () => {
     if (fs.existsSync(tokenPath)) {
       //file exists
       prompt[0].choices.shift();
+    } else {
+      prompt[0].choices = [prompt[0].choices[0], prompt[0].choices[3]];
     }
   } catch (err) {
     console.error(err);
