@@ -60,7 +60,8 @@ const verify = callback => {
   });
 };
 
-const tokenCreated = () => console.log('token.json has been created');
+const tokenCreated = () =>
+  console.log('token.json has been created. Run npm start again.');
 
 // request an authToken from BCS
 const login = async () => {
