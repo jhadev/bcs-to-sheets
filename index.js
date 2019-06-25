@@ -1,8 +1,6 @@
 import fs from 'fs';
-import readline from 'readline';
 import { google } from 'googleapis';
 import axios from 'axios';
-import { get } from 'http';
 import {
   email,
   password,
@@ -12,7 +10,7 @@ import {
   spreadsheetId
 } from './utils/config';
 import prompt from './utils/prompt';
-import { authorize, getNewToken } from './utils/auth';
+import { authorize } from './utils/auth';
 import inquirer from 'inquirer';
 const tokenPath = './token.json';
 
