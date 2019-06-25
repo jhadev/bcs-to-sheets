@@ -7,10 +7,10 @@ import {
   courseId,
   gradesEndpoint,
   loginEndpoint,
-  spreadsheetId
-} from './utils/config';
-import prompt from './utils/prompt';
-import { authorize } from './utils/auth';
+  spreadsheetId,
+  prompt,
+  authorize
+} from './utils/';
 import inquirer from 'inquirer';
 const tokenPath = './token.json';
 

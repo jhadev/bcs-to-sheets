@@ -3,8 +3,8 @@ import 'dotenv/config';
 const email = process.env.EMAIL;
 const password = process.env.BCS_PASSWORD;
 const courseId = parseInt(process.env.COURSE);
-const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 const spreadsheetId = process.env.SHEET;
+const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
