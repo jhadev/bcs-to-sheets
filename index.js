@@ -37,7 +37,7 @@ const runPrompt = async () => {
         verify(readGradesFromSheet);
         break;
       case 'Write To Google Sheets':
-        verify(writeGradesToSheets);
+        verify(writeGradesToSheet);
         break;
       case 'Quit':
         process.exit();
@@ -108,7 +108,7 @@ const getGrades = async () => {
   }
 };
 
-const writeGradesToSheets = async auth => {
+const writeGradesToSheet = async auth => {
   // just messing around has no use at the moment.
   // const mapStudentToGrade = new Map(grades);
   // console.log(mapStudentToGrade);
