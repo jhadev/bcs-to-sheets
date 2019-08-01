@@ -14,6 +14,8 @@ import {
 import inquirer from 'inquirer';
 const tokenPath = './token.json';
 
+// EXCUSE THE MESS
+
 // query and sheet params homeworkTitle and selectionRange
 const params = {};
 
@@ -63,11 +65,11 @@ const tokenCreated = () =>
 
 // request an authToken from BCS
 const login = async () => {
-  const response = await axios.post(loginEndpoint, {
-    email,
-    password
-  });
   try {
+    const response = await axios.post(loginEndpoint, {
+      email,
+      password
+    });
     const { authToken } = response.data.authenticationInfo;
     return authToken;
   } catch (err) {
@@ -80,27 +82,29 @@ const getGrades = async () => {
   const authToken = await login();
   console.log(`BCS AUTH TOKEN: ${authToken}`);
 
-  const response = await axios.post(
-    gradesEndpoint,
-    {
-      courseId
-    },
-    {
-      headers: {
-        authToken
-      }
-    }
-  );
   try {
+    const response = await axios.post(
+      gradesEndpoint,
+      {
+        courseId
+      },
+      {
+        headers: {
+          authToken
+        }
+      }
+    );
     // filter from
     const { data } = response;
     const grades = data
       .filter(({ assignmentTitle }) => params.homeworkTitle === assignmentTitle)
-      .map(({ studentName, grade, assignmentTitle }) => [
-        studentName,
-        grade,
-        assignmentTitle
-      ]);
+      .map(({ studentName, grade, assignmentTitle, submitted }) => {
+        if (submitted) {
+          return [studentName, grade, assignmentTitle];
+        } else {
+          return [studentName, 'Unsubmitted', assignmentTitle];
+        }
+      });
 
     return grades;
   } catch (err) {

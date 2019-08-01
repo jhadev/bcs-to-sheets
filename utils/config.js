@@ -12,6 +12,7 @@ const TOKEN_PATH = 'token.json';
 const loginEndpoint = 'https://bootcampspot.com/api/instructor/v1/login';
 const gradesEndpoint = 'https://bootcampspot.com/api/instructor/v1/grades';
 
+// CHANGE ASSIGNMENTS FOR DATA CLASS here
 const assignments = [
   '1: Building a Wireframe / That Portfolio Though',
   '2: Responsiveness Assignment',
