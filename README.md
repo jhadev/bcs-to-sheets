@@ -15,7 +15,7 @@ Navigate to Google Sheets API [reference page](https://developers.google.com/she
 4. Create a .env file in the root of the project and add these fields:
 
    - EMAIL=_Your Bootcampspot email_
-   - BCS*PASSWORD=\_Your Bootcampspot password*
+   - BCSPASSWORD=_Your Bootcampspot password_
    - SHEET=_Google Sheet ID ex: sj7r-LuSE8mbV6lktPgmW7KUbbdlpeEIi0I1lUsSBgo (Can be found in sheet url)_
    - COURSE=_Course ID Number (Found in BCS API call usually a 4 digit number)_
 
