@@ -19,6 +19,18 @@ Navigate to Google Sheets API [reference page](https://developers.google.com/she
    - SHEET=_Google Sheet ID ex: sj7r-LuSE8mbV6lktPgmW7KUbbdlpeEIi0I1lUsSBgo (Can be found in sheet url)_
    - COURSE=_Course ID Number (Found in BCS API call usually a 4 digit number)_
 
+You can find a list of course ids for your classes by running the sample api call on this [page](https://www.bootcampspot.com/instructor-api-docs/me).
+
+```
+"enrollments": [
+    {
+      "id": 291110,
+      "courseId": 1712,
+      "userAccountId": 27856,
+      "courseRoleId": 4,
+      "active": true,
+```
+
 5. Run npm start from the root of the project.
 
    - You should see an inquirer prompt, select the option to 'Get A Token From Google'
