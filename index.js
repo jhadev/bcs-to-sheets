@@ -142,10 +142,10 @@ const writeGradesToSheet = async auth => {
       return;
     } else {
       console.log(`Selected Homework: ${params.homeworkTitle}`);
-      console.log('LOCAL VALUES');
+      console.log('GRADES FROM BCS');
       console.table(grades);
       console.log('Sheet updated!');
-      console.log('SHEET VALUES');
+      console.log('GOOGLE SHEET VALUES');
       console.table(response.config.data.values);
     }
     runPrompt();
