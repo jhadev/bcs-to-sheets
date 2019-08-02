@@ -11,7 +11,10 @@ import {
   spreadsheetId,
   prompt,
   authorize,
-  TOKEN_PATH
+  TOKEN_PATH,
+  groupByGradeConfig,
+  countConfig,
+  readConfig
 } from './utils/';
 import inquirer from 'inquirer';
 
@@ -169,8 +172,8 @@ const readGradesFromSheet = auth => {
           }
           return [name, grade, assignment];
         });
-        console.log(`Rows: ${rows.length}`);
-        console.table(rows);
+        console.log(`\n Rows: ${rows.length}`);
+        console.log(table(rows, readConfig));
 
         const gradesCount = rows
           .map(([name, grade, assignment]) => grade)
@@ -184,9 +187,11 @@ const readGradesFromSheet = auth => {
             return map;
           }, new Map());
         console.log(`\nGrades Count\n`);
-        console.table(new Map([...gradesCount.entries()].sort()));
 
-        const gradesByName = rows
+        const countByGrade = [...gradesCount.entries()].sort();
+        console.log(table(countByGrade, countConfig));
+
+        const groupByGrade = rows
           .map(([name, grade]) => ({
             name,
             grade
@@ -201,23 +206,9 @@ const readGradesFromSheet = auth => {
             return map;
           }, new Map());
 
-        const gradesTable = [...gradesByName.entries()].sort();
-
-        const config = {
-          columns: {
-            0: {
-              alignment: 'left',
-              width: 10
-            },
-            1: {
-              alignment: 'center',
-              width: 90
-            }
-          }
-        };
-
-        let output = table(gradesTable, config);
-        console.log(output);
+        const gradesTable = [...groupByGrade.entries()].sort();
+        console.log(`\nGroup By Grade\n`);
+        console.log(table(gradesTable, groupByGradeConfig));
       } else {
         console.log('No data found.');
       }
