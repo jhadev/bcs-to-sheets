@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { table } from 'table';
 import { google } from 'googleapis';
 import axios from 'axios';
 import {
@@ -192,14 +193,31 @@ const readGradesFromSheet = auth => {
           }))
           .reduce((map, { name, grade }) => {
             if (map.has(grade)) {
-              map.set(grade, map.get(name).push(name));
+              map.set(grade, [...map.get(grade), name]);
             } else {
-              map.set(grade, []);
+              map.set(grade, [name]);
             }
+            map.delete('Grade');
             return map;
           }, new Map());
 
-        console.log(gradesByName);
+        const gradesTable = [...gradesByName.entries()].sort();
+
+        const config = {
+          columns: {
+            0: {
+              alignment: 'left',
+              width: 10
+            },
+            1: {
+              alignment: 'center',
+              width: 90
+            }
+          }
+        };
+
+        let output = table(gradesTable, config);
+        console.log(output);
       } else {
         console.log('No data found.');
       }
