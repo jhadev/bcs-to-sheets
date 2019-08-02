@@ -11,6 +11,7 @@ import {
   SCOPES,
   TOKEN_PATH
 } from './config';
+import { readConfig, countConfig, groupByGradeConfig } from './tables';
 
 export {
   email,
@@ -24,5 +25,8 @@ export {
   TOKEN_PATH,
   prompt,
   authorize,
-  getNewToken
+  getNewToken,
+  readConfig,
+  countConfig,
+  groupByGradeConfig
 };

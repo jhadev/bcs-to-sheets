@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { table } from 'table';
 import { google } from 'googleapis';
 import axios from 'axios';
 import {
@@ -10,7 +11,10 @@ import {
   spreadsheetId,
   prompt,
   authorize,
-  TOKEN_PATH
+  TOKEN_PATH,
+  groupByGradeConfig,
+  countConfig,
+  readConfig
 } from './utils/';
 import inquirer from 'inquirer';
 
@@ -138,10 +142,10 @@ const writeGradesToSheet = async auth => {
       return;
     } else {
       console.log(`Selected Homework: ${params.homeworkTitle}`);
-      console.log('LOCAL VALUES');
+      console.log('GRADES FROM BCS');
       console.table(grades);
       console.log('Sheet updated!');
-      console.log('SHEET VALUES');
+      console.log('GOOGLE SHEET VALUES');
       console.table(response.config.data.values);
     }
     runPrompt();
@@ -168,8 +172,8 @@ const readGradesFromSheet = auth => {
           }
           return [name, grade, assignment];
         });
-        console.log(`Rows: ${rows.length}`);
-        console.table(rows);
+        console.log(`\n Rows: ${rows.length}`);
+        console.log(table(rows, readConfig));
 
         const gradesCount = rows
           .map(([name, grade, assignment]) => grade)
@@ -183,7 +187,28 @@ const readGradesFromSheet = auth => {
             return map;
           }, new Map());
         console.log(`\nGrades Count\n`);
-        console.table(new Map([...gradesCount.entries()].sort()));
+
+        const countByGrade = [...gradesCount.entries()].sort();
+        console.log(table(countByGrade, countConfig));
+
+        const groupByGrade = rows
+          .map(([name, grade]) => ({
+            name,
+            grade
+          }))
+          .reduce((map, { name, grade }) => {
+            if (map.has(grade)) {
+              map.set(grade, [...map.get(grade), name]);
+            } else {
+              map.set(grade, [name]);
+            }
+            map.delete('Grade');
+            return map;
+          }, new Map());
+
+        const gradesTable = [...groupByGrade.entries()].sort();
+        console.log(`\nGroup By Grade\n`);
+        console.log(table(gradesTable, groupByGradeConfig));
       } else {
         console.log('No data found.');
       }
