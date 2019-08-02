@@ -173,12 +173,17 @@ const readGradesFromSheet = auth => {
 
         const gradesCount = rows
           .map(([name, grade, assignment]) => grade)
-          .reduce((obj, grade) => {
-            obj[grade] = (obj[grade] || 0) + 1;
-            return obj;
-          }, {});
-        // NEED TO SORT
-        console.table(Object.entries(gradesCount));
+          .reduce((map, grade) => {
+            if (map.has(grade)) {
+              map.set(grade, map.get(grade) + 1);
+            } else {
+              map.set(grade, 1);
+            }
+            map.delete('Grade');
+            return map;
+          }, new Map());
+        console.log(`\nGrades Count\n`);
+        console.table(new Map([...gradesCount.entries()].sort()));
       } else {
         console.log('No data found.');
       }
