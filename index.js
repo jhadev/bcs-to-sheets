@@ -9,10 +9,10 @@ import {
   loginEndpoint,
   spreadsheetId,
   prompt,
-  authorize
+  authorize,
+  TOKEN_PATH
 } from './utils/';
 import inquirer from 'inquirer';
-const tokenPath = './token.json';
 
 // EXCUSE THE MESS
 
@@ -20,21 +20,22 @@ const tokenPath = './token.json';
 const params = {};
 
 const runPrompt = async () => {
-  const {
-    doChoice,
-    assignmentChoice,
-    sheetChoice,
-    selectionChoice
-  } = await inquirer.prompt(prompt);
-
-  params.selectionRange = `${sheetChoice}!${selectionChoice}`;
-
-  params.homeworkTitle = assignmentChoice;
-
   try {
+    const {
+      doChoice,
+      assignmentChoice,
+      sheetChoice,
+      selectionChoice
+    } = await inquirer.prompt(prompt);
+
+    params.selectionRange = `${sheetChoice}!${selectionChoice}`;
+
+    params.homeworkTitle = assignmentChoice;
+
     switch (doChoice) {
       case 'Get A Token From Google':
         verify(tokenCreated);
+        break;
       case 'Read from Google Sheets':
         verify(readGradesFromSheet);
         break;
@@ -45,7 +46,7 @@ const runPrompt = async () => {
         process.exit();
         break;
       default:
-        console.log('Hi');
+        console.log('Something went wrong. Oops.');
     }
   } catch (err) {
     console.log(err);
@@ -113,19 +114,14 @@ const getGrades = async () => {
 };
 
 const writeGradesToSheet = async auth => {
-  // just messing around has no use at the moment.
-  // const mapStudentToGrade = new Map(grades);
-  // console.log(mapStudentToGrade);
-
   const grades = await getGrades();
 
   const header = ['Student Name', 'Grade', 'Assignment'];
   grades.unshift(header);
-
   // define sheet options here
   const options = {
     spreadsheetId,
-    range: params.selectionRange, //Change Sheet1 if your worksheet's name is something else
+    range: params.selectionRange,
     valueInputOption: 'USER_ENTERED',
     // insertDataOption: 'OVERWRITE', //INSERT_ROWS
     responseValueRenderOption: 'FORMATTED_VALUE',
@@ -163,19 +159,13 @@ const readGradesFromSheet = auth => {
       if (err) {
         return console.log(err.errors);
       }
-      const rows = response.data.values;
-      if (rows.length) {
-        rows.map(row => {
-          row.length === 1 ? (row.length = 2) && (row[1] = 'Ungraded') : null;
-          const [name, grade, assignment] = row;
-          row = { name, grade, assignment };
-          params.homeworkTitle !== undefined
-            ? console.log(params.homeworkTitle)
-            : null;
-          console.log(
-            `=================================================================`
-          );
-          console.log(row);
+      const { values } = response.data;
+      if (values.length) {
+        const rows = values.map(([name, grade, assignment]) => {
+          if (!grade) {
+            grade = 'Submitted But Ungraded';
+          }
+          return [name, grade, assignment];
         });
         console.log(`Rows: ${rows.length}`);
         console.table(rows);
@@ -189,7 +179,7 @@ const readGradesFromSheet = auth => {
 
 const checkIfTokenExists = () => {
   try {
-    if (fs.existsSync(tokenPath)) {
+    if (fs.existsSync(TOKEN_PATH)) {
       //file exists
       prompt[0].choices.shift();
     } else {
