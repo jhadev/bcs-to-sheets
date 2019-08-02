@@ -131,7 +131,7 @@ const writeGradesToSheet = async auth => {
   };
 
   const sheets = google.sheets({ version: 'v4', auth });
-  // UPDATE WILL OVERWRITE EXISTING FIELDS BUT NOW CREATE NEW ROWS.
+  // UPDATE WILL OVERWRITE EXISTING FIELDS BUT NOT CREATE NEW ROWS UNLESS THEY DO NOT EXIST.
   sheets.spreadsheets.values.update(options, (err, response) => {
     if (err) {
       console.log(`The API returned an error: ${err}`);
@@ -153,13 +153,14 @@ const readGradesFromSheet = auth => {
   sheets.spreadsheets.values.get(
     {
       spreadsheetId,
-      range: params.selectionRange //Change Sheet1 if your worksheet's name is something else
+      range: params.selectionRange
     },
     (err, response) => {
       if (err) {
         return console.log(err.errors);
       }
       const { values } = response.data;
+      // TODO: Clean this mess up.
       if (values.length) {
         const rows = values.map(([name, grade, assignment]) => {
           if (!grade) {
@@ -169,6 +170,15 @@ const readGradesFromSheet = auth => {
         });
         console.log(`Rows: ${rows.length}`);
         console.table(rows);
+
+        const gradesCount = rows
+          .map(([name, grade, assignment]) => grade)
+          .reduce((obj, grade) => {
+            obj[grade] = (obj[grade] || 0) + 1;
+            return obj;
+          }, {});
+        // NEED TO SORT
+        console.table(Object.entries(gradesCount));
       } else {
         console.log('No data found.');
       }
