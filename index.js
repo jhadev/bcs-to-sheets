@@ -190,9 +190,16 @@ const readGradesFromSheet = auth => {
             name,
             grade
           }))
-          .map(({ name, grade }) => ({ [grade]: name }));
+          .reduce((map, { name, grade }) => {
+            if (map.has(grade)) {
+              map.set(grade, map.get(name).push(name));
+            } else {
+              map.set(grade, []);
+            }
+            return map;
+          }, new Map());
 
-        console.table(Object.entries(gradesByName));
+        console.log(gradesByName);
       } else {
         console.log('No data found.');
       }
