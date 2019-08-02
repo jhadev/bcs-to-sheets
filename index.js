@@ -184,6 +184,15 @@ const readGradesFromSheet = auth => {
           }, new Map());
         console.log(`\nGrades Count\n`);
         console.table(new Map([...gradesCount.entries()].sort()));
+
+        const gradesByName = rows
+          .map(([name, grade]) => ({
+            name,
+            grade
+          }))
+          .map(({ name, grade }) => ({ [grade]: name }));
+
+        console.table(Object.entries(gradesByName));
       } else {
         console.log('No data found.');
       }
