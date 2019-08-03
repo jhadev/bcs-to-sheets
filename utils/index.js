@@ -8,6 +8,7 @@ import {
   assignments,
   gradesEndpoint,
   loginEndpoint,
+  userEndpoint,
   SCOPES,
   TOKEN_PATH
 } from './config';
@@ -21,6 +22,7 @@ export {
   assignments,
   gradesEndpoint,
   loginEndpoint,
+  userEndpoint,
   SCOPES,
   TOKEN_PATH,
   prompt,

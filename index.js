@@ -2,12 +2,14 @@ import fs from 'fs';
 import { table } from 'table';
 import { google } from 'googleapis';
 import axios from 'axios';
+import inquirer from 'inquirer';
 import {
   email,
   password,
   courseId,
   gradesEndpoint,
   loginEndpoint,
+  userEndpoint,
   spreadsheetId,
   prompt,
   authorize,
@@ -16,7 +18,6 @@ import {
   countConfig,
   readConfig
 } from './utils/';
-import inquirer from 'inquirer';
 
 // EXCUSE THE MESS
 
@@ -39,6 +40,9 @@ const runPrompt = async () => {
     switch (doChoice) {
       case 'Get A Token From Google':
         verify(tokenCreated);
+        break;
+      case 'Get Course IDs':
+        getBcsUserInfo();
         break;
       case 'Read from Google Sheets':
         verify(readGradesFromSheet);
@@ -77,6 +81,41 @@ const login = async () => {
     });
     const { authToken } = response.data.authenticationInfo;
     return authToken;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const getBcsUserInfo = async () => {
+  const authToken = await login();
+  console.log(`BCS AUTH TOKEN: ${authToken}\n`);
+
+  try {
+    const response = await axios.post(
+      userEndpoint,
+      {},
+      {
+        headers: {
+          authToken
+        }
+      }
+    );
+    // filter from
+    const { userAccount, enrollments } = response.data;
+
+    console.log(`ID: ${userAccount.id}`);
+    console.log(`Name: ${userAccount.firstName} ${userAccount.lastName}`);
+    console.log(`Username: ${userAccount.userName}`);
+
+    const courses = enrollments.map(({ course }) => ({
+      courseId: course.id,
+      name: course.name,
+      startDate: course.startDate,
+      endDate: course.endDate
+    }));
+    console.log(`\ncourse id can be put into the .env file for setup\n`);
+    console.table(courses);
+    runPrompt();
   } catch (err) {
     console.log(err);
   }
@@ -223,7 +262,11 @@ const checkIfTokenExists = () => {
       //file exists
       prompt[0].choices.shift();
     } else {
-      prompt[0].choices = [prompt[0].choices[0], prompt[0].choices[3]];
+      prompt[0].choices = [
+        prompt[0].choices[0],
+        prompt[0].choices[1],
+        prompt[0].choices[4]
+      ];
     }
   } catch (err) {
     console.error(err);

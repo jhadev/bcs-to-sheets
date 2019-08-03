@@ -24,12 +24,14 @@ You can find a list of course ids for your classes by running the sample api cal
 ```
 "enrollments": [
     {
-      "id": 291110,
-      "courseId": 1712,
-      "userAccountId": 27856,
+      "id": 45834,
+      "courseId": 6849,
+      "userAccountId": 8576,
       "courseRoleId": 4,
       "active": true,
 ```
+
+**Or you can get a list of course ids by running npm start and selecting the option in the prompt.**
 
 5. Run npm start from the root of the project.
 
@@ -48,9 +50,14 @@ Once you have 'token.json' in your project you now have read/write access for Go
 
 Setup is done! Run npm start again and choose your option.
 
+- 'Get Course IDs':
+
+  Fetches your user info from Bootcamspot and shows your list of cohorts and their course ids. One of which can be placed into the .env file to get grade data and run the sheet commands.
+
 - 'Read from Google Sheets':
 
   This reads back your sheet file based on your selection range and prints it to the command line.
+  Also displays counts of grades along with a table that groups students by grade.
 
 - 'Write To Google Sheets':
 

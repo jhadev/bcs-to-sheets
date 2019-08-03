@@ -11,6 +11,7 @@ const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 const TOKEN_PATH = 'token.json';
 const loginEndpoint = 'https://bootcampspot.com/api/instructor/v1/login';
 const gradesEndpoint = 'https://bootcampspot.com/api/instructor/v1/grades';
+const userEndpoint = 'https://bootcampspot.com/api/instructor/v1/me';
 
 // CHANGE ASSIGNMENTS FOR DATA CLASS here
 const assignments = [
@@ -40,6 +41,7 @@ export {
   assignments,
   gradesEndpoint,
   loginEndpoint,
+  userEndpoint,
   SCOPES,
   TOKEN_PATH
 };

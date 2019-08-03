@@ -7,6 +7,7 @@ const prompt = [
     message: 'What would you like to do?',
     choices: [
       'Get A Token From Google',
+      'Get Course IDs',
       'Read from Google Sheets',
       'Write To Google Sheets',
       'Quit'
@@ -18,8 +19,8 @@ const prompt = [
     message: 'Enter your sheet name ex: Sheet1 or Week-1',
     validate: input => (typeof input === 'string' ? true : false),
     when: answer =>
-      answer.doChoice !== 'Quit' &&
-      answer.doChoice !== 'Get A Token From Google'
+      answer.doChoice === 'Read from Google Sheets' ||
+      answer.doChoice === 'Write To Google Sheets'
   },
   {
     type: 'input',
@@ -27,8 +28,8 @@ const prompt = [
     message: 'Enter your sheet selection range in this format - A1:C',
     validate: input => (typeof input === 'string' ? true : false),
     when: answer =>
-      answer.doChoice !== 'Quit' &&
-      answer.doChoice !== 'Get A Token From Google'
+      answer.doChoice === 'Read from Google Sheets' ||
+      answer.doChoice === 'Write To Google Sheets'
   },
   {
     type: 'list',
