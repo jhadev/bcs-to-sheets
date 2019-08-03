@@ -42,7 +42,7 @@ const runPrompt = async () => {
         verify(tokenCreated);
         break;
       case 'Get Course IDs':
-        getBcsUserInfo();
+        getCourseIds();
         break;
       case 'Read from Google Sheets':
         verify(readGradesFromSheet);
@@ -86,7 +86,7 @@ const login = async () => {
   }
 };
 
-const getBcsUserInfo = async () => {
+const getCourseIds = async () => {
   const authToken = await login();
   console.log(`BCS AUTH TOKEN: ${authToken}\n`);
 
@@ -143,11 +143,10 @@ const getGrades = async () => {
     const grades = data
       .filter(({ assignmentTitle }) => params.homeworkTitle === assignmentTitle)
       .map(({ studentName, grade, assignmentTitle, submitted }) => {
-        if (submitted) {
-          return [studentName, grade, assignmentTitle];
-        } else {
+        if (!submitted) {
           return [studentName, 'Unsubmitted', assignmentTitle];
         }
+        return [studentName, grade, assignmentTitle];
       });
 
     return grades;

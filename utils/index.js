@@ -13,6 +13,7 @@ import {
   TOKEN_PATH
 } from './config';
 import { readConfig, countConfig, groupByGradeConfig } from './tables';
+import { config } from 'dotenv';
 
 export {
   email,
