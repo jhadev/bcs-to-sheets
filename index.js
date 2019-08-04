@@ -3,6 +3,7 @@ import { table } from 'table';
 import { google } from 'googleapis';
 import axios from 'axios';
 import inquirer from 'inquirer';
+import wunderbar from '@gribnoysup/wunderbar';
 import {
   email,
   password,
@@ -190,6 +191,20 @@ const writeGradesToSheet = async auth => {
   });
 };
 
+const printBarChart = arr => {
+  const { chart, legend, scale, __raw } = wunderbar(arr, {
+    min: 0,
+    length: 42,
+    sort: 'none'
+  });
+
+  console.log();
+  console.log(chart);
+  console.log();
+  console.log(scale);
+  console.log(legend);
+};
+
 const readGradesFromSheet = auth => {
   const sheets = google.sheets({ version: 'v4', auth });
   sheets.spreadsheets.values.get(
@@ -227,7 +242,13 @@ const readGradesFromSheet = auth => {
         console.log(`\nGrades Count\n`);
 
         const countByGrade = [...gradesCount.entries()].sort();
+        const setBarChart = countByGrade.map(([grade, total]) => ({
+          value: total,
+          label: grade
+        }));
+
         console.log(table(countByGrade, countConfig));
+        printBarChart(setBarChart);
 
         const groupByGrade = rows
           .map(([name, grade]) => ({
