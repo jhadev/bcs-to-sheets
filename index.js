@@ -5,7 +5,7 @@ import axios from 'axios';
 import inquirer from 'inquirer';
 import wunderbar from '@gribnoysup/wunderbar';
 import handle from './utils/handle';
-import prompt from './utils/prompt';
+import { prompt, envPrompt, courseIdPrompt } from './utils/prompt';
 import { authorize } from './utils/auth';
 import { groupByGradeConfig, countConfig, readConfig } from './utils/tables';
 import {
@@ -47,7 +47,9 @@ const runPrompt = async () => {
       verify(tokenCreated);
       break;
     case 'Get Course IDs':
-      getCourseIds();
+      getCourseIds(EMAIL, PASSWORD)
+        .then(() => runPrompt())
+        .catch(err => console.log(err));
       break;
     case 'Display Grades From BCS':
       displayGrades();
@@ -78,11 +80,11 @@ const tokenCreated = () =>
   console.log('token.json has been created. Run npm start again.');
 
 // request an authToken from BCS
-const login = async () => {
+const login = async (email, password) => {
   const [loginErr, loginSuccess] = await handle(
     axios.post(LOGIN_ENDPOINT, {
-      EMAIL,
-      PASSWORD
+      email,
+      password
     })
   );
 
@@ -94,8 +96,8 @@ const login = async () => {
   return authToken;
 };
 
-const getCourseIds = async () => {
-  const [authTokenErr, authTokenSuccess] = await handle(login());
+const getCourseIds = async (email, password) => {
+  const [authTokenErr, authTokenSuccess] = await handle(login(email, password));
 
   if (authTokenErr) {
     return console.log(authTokenErr);
@@ -134,12 +136,11 @@ const getCourseIds = async () => {
   }));
   console.log(`\ncourse id can be put into the .env file for setup\n`);
   console.table(courses);
-  runPrompt();
 };
 
 // await token and request grades for specific class via courseId
 const getGrades = async () => {
-  const [authTokenErr, authTokenSuccess] = await handle(login());
+  const [authTokenErr, authTokenSuccess] = await handle(login(EMAIL, PASSWORD));
 
   if (authTokenErr) {
     return console.log(authTokenErr);
@@ -219,6 +220,7 @@ const writeGradesToSheet = async auth => {
   // UPDATE WILL OVERWRITE EXISTING FIELDS BUT NOT CREATE NEW ROWS UNLESS THEY DO NOT EXIST.
   sheets.spreadsheets.values.update(options, (err, response) => {
     if (err) {
+      console.log(`  Check your Sheet ID and make sure it is correct.`);
       console.log(`The API returned an error: ${err}`);
       return;
     } else {
@@ -242,6 +244,7 @@ const readGradesFromSheet = auth => {
     },
     (err, response) => {
       if (err) {
+        console.log(`  Check your Sheet ID and make sure it is correct.`);
         return console.log(err.errors);
       }
       const { values } = response.data;
@@ -252,10 +255,11 @@ const readGradesFromSheet = auth => {
         console.log(table(rows, readConfig));
         displayGradesCount(rows);
         displayGroupByGrade(rows);
+        runPrompt();
       } else {
         console.log('No data found.');
+        runPrompt();
       }
-      runPrompt();
     }
   );
 };
@@ -353,5 +357,56 @@ const convertUngraded = arr => {
   return rows;
 };
 
+const createEnv = async () => {
+  const [err, answers] = await handle(inquirer.prompt(envPrompt));
+
+  if (err) {
+    return console.log(err);
+  }
+
+  const { password, sheet, email } = answers;
+
+  getCourseIds(email, password)
+    .then(async () => {
+      const [enterIdErr, enterIdSuccess] = await handle(
+        inquirer.prompt(courseIdPrompt)
+      );
+
+      if (enterIdErr) {
+        return console.log(enterIdErr);
+      }
+
+      const { course } = enterIdSuccess;
+
+      const content = `BCS_PASSWORD=${password}
+SHEET=${sheet}
+COURSE=${course}
+EMAIL=${email}`;
+      fs.writeFile('.env', content, err => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        console.log('.env file created, run npm start again.');
+      });
+    })
+    .catch(err => console.log(err));
+};
+
+const checkEnv = () => {
+  fs.access('.env', fs.F_OK, err => {
+    if (err) {
+      console.log(
+        `  .env file does not exist. follow the prompt to create it.`
+      );
+      createEnv();
+    } else {
+      checkIfTokenExists();
+    }
+  });
+};
+
+checkEnv();
+
 // RUN
-checkIfTokenExists();
+// checkIfTokenExists();
