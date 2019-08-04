@@ -1,35 +1,32 @@
-import prompt from './prompt';
-import { authorize, getNewToken } from './auth';
-import {
-  email,
-  password,
-  courseId,
-  spreadsheetId,
-  assignments,
-  gradesEndpoint,
-  loginEndpoint,
-  userEndpoint,
-  SCOPES,
-  TOKEN_PATH
-} from './config';
-import { readConfig, countConfig, groupByGradeConfig } from './tables';
-import { config } from 'dotenv';
+// import prompt from './prompt';
+// import { authorize, getNewToken } from './auth';
+// import {
+//   EMAIL,
+//   PASSWORD,
+//   COURSE_ID,
+//   SHEET_ID,
+//   GRADES_ENDPOINT,
+//   LOGIN_ENDPOINT,
+//   USER_ENDPOINT,
+//   SCOPES,
+//   TOKEN_PATH
+// } from './config';
+// import { readConfig, countConfig, groupByGradeConfig } from './tables';
 
-export {
-  email,
-  password,
-  courseId,
-  spreadsheetId,
-  assignments,
-  gradesEndpoint,
-  loginEndpoint,
-  userEndpoint,
-  SCOPES,
-  TOKEN_PATH,
-  prompt,
-  authorize,
-  getNewToken,
-  readConfig,
-  countConfig,
-  groupByGradeConfig
-};
+// export {
+//   EMAIL,
+//   PASSWORD,
+//   COURSE_ID,
+//   SHEET_ID,
+//   GRADES_ENDPOINT,
+//   LOGIN_ENDPOINT,
+//   USER_ENDPOINT,
+//   SCOPES,
+//   TOKEN_PATH,
+//   prompt,
+//   authorize,
+//   getNewToken,
+//   readConfig,
+//   countConfig,
+//   groupByGradeConfig
+// };

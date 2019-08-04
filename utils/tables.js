@@ -7,7 +7,7 @@ const groupByGradeConfig = {
     },
     1: {
       alignment: 'left',
-      width: 70,
+      width: 80,
       wrapWord: true
     }
   }

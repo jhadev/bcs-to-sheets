@@ -1,4 +1,4 @@
-import { assignments } from './config';
+import assignments from './assignments';
 
 const prompt = [
   {
@@ -43,4 +43,4 @@ const prompt = [
   }
 ];
 
-export { prompt as default };
+export default prompt;

@@ -5,21 +5,19 @@ import axios from 'axios';
 import inquirer from 'inquirer';
 import wunderbar from '@gribnoysup/wunderbar';
 import handle from './utils/handle';
+import prompt from './utils/prompt';
+import { authorize } from './utils/auth';
+import { groupByGradeConfig, countConfig, readConfig } from './utils/tables';
 import {
-  email,
-  password,
-  courseId,
-  gradesEndpoint,
-  loginEndpoint,
-  userEndpoint,
-  spreadsheetId,
-  prompt,
-  authorize,
-  TOKEN_PATH,
-  groupByGradeConfig,
-  countConfig,
-  readConfig
-} from './utils/';
+  EMAIL,
+  PASSWORD,
+  COURSE_ID,
+  GRADES_ENDPOINT,
+  LOGIN_ENDPOINT,
+  USER_ENDPOINT,
+  SHEET_ID,
+  TOKEN_PATH
+} from './utils/config';
 
 // EXCUSE THE MESS
 
@@ -82,9 +80,9 @@ const tokenCreated = () =>
 // request an authToken from BCS
 const login = async () => {
   const [loginErr, loginSuccess] = await handle(
-    axios.post(loginEndpoint, {
-      email,
-      password
+    axios.post(LOGIN_ENDPOINT, {
+      EMAIL,
+      PASSWORD
     })
   );
 
@@ -108,7 +106,7 @@ const getCourseIds = async () => {
 
   const [userDataErr, userDataSuccess] = await handle(
     axios.post(
-      userEndpoint,
+      USER_ENDPOINT,
       {},
       {
         headers: {
@@ -152,9 +150,9 @@ const getGrades = async () => {
 
   const [getGradesErr, getGradesSuccess] = await handle(
     axios.post(
-      gradesEndpoint,
+      GRADES_ENDPOINT,
       {
-        courseId
+        courseId: COURSE_ID
       },
       {
         headers: {
@@ -207,7 +205,7 @@ const writeGradesToSheet = async auth => {
   grades.unshift(header);
   // define sheet options here
   const options = {
-    spreadsheetId,
+    SHEET_ID,
     range: params.selectionRange,
     valueInputOption: 'USER_ENTERED',
     // insertDataOption: 'OVERWRITE', //INSERT_ROWS
@@ -239,7 +237,7 @@ const readGradesFromSheet = auth => {
   const sheets = google.sheets({ version: 'v4', auth });
   sheets.spreadsheets.values.get(
     {
-      spreadsheetId,
+      SHEET_ID,
       range: params.selectionRange
     },
     (err, response) => {
