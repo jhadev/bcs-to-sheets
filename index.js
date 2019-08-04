@@ -205,7 +205,7 @@ const writeGradesToSheet = async auth => {
   grades.unshift(header);
   // define sheet options here
   const options = {
-    SHEET_ID,
+    spreadsheetId: SHEET_ID,
     range: params.selectionRange,
     valueInputOption: 'USER_ENTERED',
     // insertDataOption: 'OVERWRITE', //INSERT_ROWS
@@ -237,7 +237,7 @@ const readGradesFromSheet = auth => {
   const sheets = google.sheets({ version: 'v4', auth });
   sheets.spreadsheets.values.get(
     {
-      SHEET_ID,
+      spreadsheetId: SHEET_ID,
       range: params.selectionRange
     },
     (err, response) => {
@@ -299,7 +299,7 @@ const printBarChart = arr => {
 
 const displayGradesCount = arr => {
   const gradesCount = arr
-    .map(([, grade, ,]) => grade)
+    .map(([, grade]) => grade)
     .reduce((map, grade) => {
       if (map.has(grade)) {
         map.set(grade, map.get(grade) + 1);
