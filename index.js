@@ -45,6 +45,9 @@ const runPrompt = async () => {
       case 'Get Course IDs':
         getCourseIds();
         break;
+      case 'Display Grades From BCS':
+        displayGrades();
+        break;
       case 'Read from Google Sheets':
         verify(readGradesFromSheet);
         break;
@@ -156,6 +159,21 @@ const getGrades = async () => {
   }
 };
 
+const displayGrades = async () => {
+  try {
+    const grades = await getGrades();
+    console.log(`Selected Homework: ${params.homeworkTitle}`);
+    const rows = convertUngraded(grades);
+    console.log(`\n Rows: ${rows.length}`);
+    console.log(table(rows, readConfig));
+    displayGradesCount(rows);
+    displayGroupByGrade(rows);
+    runPrompt();
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const writeGradesToSheet = async auth => {
   const grades = await getGrades();
 
@@ -191,20 +209,6 @@ const writeGradesToSheet = async auth => {
   });
 };
 
-const printBarChart = arr => {
-  const { chart, legend, scale, __raw } = wunderbar(arr, {
-    min: 0,
-    length: 42,
-    sort: 'none'
-  });
-
-  console.log();
-  console.log(chart);
-  console.log();
-  console.log(scale);
-  console.log(legend);
-};
-
 const readGradesFromSheet = auth => {
   const sheets = google.sheets({ version: 'v4', auth });
   sheets.spreadsheets.values.get(
@@ -219,55 +223,11 @@ const readGradesFromSheet = auth => {
       const { values } = response.data;
       // TODO: Clean this mess up.
       if (values.length) {
-        const rows = values.map(([name, grade, assignment]) => {
-          if (!grade) {
-            grade = 'Submitted But Ungraded';
-          }
-          return [name, grade, assignment];
-        });
+        const rows = convertUngraded(values);
         console.log(`\n Rows: ${rows.length}`);
         console.log(table(rows, readConfig));
-
-        const gradesCount = rows
-          .map(([name, grade, assignment]) => grade)
-          .reduce((map, grade) => {
-            if (map.has(grade)) {
-              map.set(grade, map.get(grade) + 1);
-            } else {
-              map.set(grade, 1);
-            }
-            map.delete('Grade');
-            return map;
-          }, new Map());
-        console.log(`\nGrades Count\n`);
-
-        const countByGrade = [...gradesCount.entries()].sort();
-        const setBarChart = countByGrade.map(([grade, total]) => ({
-          value: total,
-          label: grade
-        }));
-
-        console.log(table(countByGrade, countConfig));
-        printBarChart(setBarChart);
-
-        const groupByGrade = rows
-          .map(([name, grade]) => ({
-            name,
-            grade
-          }))
-          .reduce((map, { name, grade }) => {
-            if (map.has(grade)) {
-              map.set(grade, [...map.get(grade), name]);
-            } else {
-              map.set(grade, [name]);
-            }
-            map.delete('Grade');
-            return map;
-          }, new Map());
-
-        const gradesTable = [...groupByGrade.entries()].sort();
-        console.log(`\nGroup By Grade\n`);
-        console.log(table(gradesTable, groupByGradeConfig));
+        displayGradesCount(rows);
+        displayGroupByGrade(rows);
       } else {
         console.log('No data found.');
       }
@@ -285,12 +245,82 @@ const checkIfTokenExists = () => {
       prompt[0].choices = [
         prompt[0].choices[0],
         prompt[0].choices[1],
-        prompt[0].choices[4]
+        prompt[0].choices[5]
       ];
     }
   } catch (err) {
     console.error(err);
   }
+};
+
+const printBarChart = arr => {
+  const { chart, legend, scale, __raw } = wunderbar(arr, {
+    min: 0,
+    length: 42,
+    sort: 'none'
+  });
+
+  console.log();
+  console.log(chart);
+  console.log();
+  console.log(scale);
+  console.log(legend);
+};
+
+const displayGradesCount = arr => {
+  const gradesCount = arr
+    .map(([name, grade, assignment]) => grade)
+    .reduce((map, grade) => {
+      if (map.has(grade)) {
+        map.set(grade, map.get(grade) + 1);
+      } else {
+        map.set(grade, 1);
+      }
+      map.delete('Grade');
+      return map;
+    }, new Map());
+  console.log(`\nGrades Count\n`);
+
+  const countByGrade = [...gradesCount.entries()].sort();
+  const setBarChart = countByGrade.map(([grade, total]) => ({
+    value: total,
+    label: grade
+  }));
+
+  console.log(table(countByGrade, countConfig));
+  printBarChart(setBarChart);
+};
+
+const displayGroupByGrade = arr => {
+  const groupByGrade = arr
+    .map(([name, grade]) => ({
+      name,
+      grade
+    }))
+    .reduce((map, { name, grade }) => {
+      if (map.has(grade)) {
+        map.set(grade, [...map.get(grade), name]);
+      } else {
+        map.set(grade, [name]);
+      }
+      map.delete('Grade');
+      return map;
+    }, new Map());
+
+  const gradesTable = [...groupByGrade.entries()].sort();
+  console.log(`\nGroup By Grade\n`);
+  console.log(table(gradesTable, groupByGradeConfig));
+};
+
+const convertUngraded = arr => {
+  const rows = arr.map(([name, grade, assignment]) => {
+    if (!grade) {
+      grade = 'Submitted But Ungraded';
+    }
+    return [name, grade, assignment];
+  });
+
+  return rows;
 };
 
 // RUN

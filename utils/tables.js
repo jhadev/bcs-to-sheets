@@ -2,11 +2,12 @@ const groupByGradeConfig = {
   columns: {
     0: {
       alignment: 'center',
-      width: 10
+      width: 20,
+      wrapWord: true
     },
     1: {
       alignment: 'center',
-      width: 80,
+      width: 70,
       wrapWord: true
     }
   }
@@ -15,16 +16,19 @@ const groupByGradeConfig = {
 const readConfig = {
   columns: {
     0: {
-      alignment: 'left',
-      width: 20
+      alignment: 'center',
+      width: 20,
+      wrapWord: true
     },
     1: {
       alignment: 'center',
-      width: 10
+      width: 20,
+      wrapWord: true
     },
     2: {
       alignment: 'center',
-      width: 60
+      width: 40,
+      wrapWord: true
     }
   }
 };
@@ -33,11 +37,13 @@ const countConfig = {
   columns: {
     0: {
       alignment: 'center',
-      width: 10
+      width: 20,
+      wrapWord: true
     },
     1: {
       alignment: 'center',
-      width: 30
+      width: 40,
+      wrapWord: true
     }
   }
 };

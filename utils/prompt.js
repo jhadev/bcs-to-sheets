@@ -8,6 +8,7 @@ const prompt = [
     choices: [
       'Get A Token From Google',
       'Get Course IDs',
+      'Display Grades From BCS',
       'Read from Google Sheets',
       'Write To Google Sheets',
       'Quit'
@@ -36,7 +37,9 @@ const prompt = [
     name: 'assignmentChoice',
     message: 'Which assignment would you like to send to Google Sheets?',
     choices: assignments,
-    when: answer => answer.doChoice === 'Write To Google Sheets'
+    when: answer =>
+      answer.doChoice === 'Write To Google Sheets' ||
+      answer.doChoice === 'Display Grades From BCS'
   }
 ];
 
