@@ -276,6 +276,7 @@ const checkIfTokenExists = () => {
       prompt[0].choices = [
         prompt[0].choices[0],
         prompt[0].choices[1],
+        prompt[0].choices[2],
         prompt[0].choices[5]
       ];
       runPrompt();

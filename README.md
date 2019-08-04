@@ -40,19 +40,19 @@ Once you have 'token.json' in your project you now have read/write access for Go
 
 Setup is done! Run npm start again and choose your option.
 
-- 'Get Course IDs':
+- **'Get Course IDs'**:
 
   Fetches your user info from Bootcampspot and shows your list of cohorts and their course ids. One of which can be placed into the .env file to get grade data and run the sheet commands.
 
-- 'Display Grades From BCS':
+- **'Display Grades From BCS'**:
 
   Fetches grades for the selected homework a prints them out in various ways on the command line.
 
-- 'Read from Google Sheets':
+- **'Read from Google Sheets'**:
 
   This reads back your sheet file based on your selection range and prints it to the command line.
   Also displays counts of grades along with a table that groups students by grade.
 
-- 'Write To Google Sheets':
+- **'Write To Google Sheets'**:
 
   This fetches an authorization token from Bootcampspot, finds your specific course by the Course ID provided in the .env, fetches grades for your selected homework, then writes them to the sheet and range you provided in the prompt. This does not append new values to the sheet, it either updates existing fields in the range provided or creates them if they don't exist. It also creates headers for the columns (Student Name, Grade, Assignment) so you can start the range at the top row. Both values from BCS and updated Google Sheet values will be printed in the console.
