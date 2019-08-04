@@ -263,20 +263,26 @@ const readGradesFromSheet = auth => {
 };
 
 const checkIfTokenExists = () => {
-  try {
-    if (fs.existsSync(TOKEN_PATH)) {
-      //file exists
-      prompt[0].choices.shift();
-    } else {
+  fs.access(TOKEN_PATH, fs.F_OK, err => {
+    if (err) {
+      console.log(
+        `  token.json doesn't exist, please select 'Get A Token From Google to continue.\n`
+      );
+      console.log(
+        `  You can also get the course ids for your classes by selecting 'Get Course IDs'.\n`
+      );
       prompt[0].choices = [
         prompt[0].choices[0],
         prompt[0].choices[1],
         prompt[0].choices[5]
       ];
+      runPrompt();
+    } else {
+      //file exists
+      prompt[0].choices.shift();
+      runPrompt();
     }
-  } catch (err) {
-    console.error(err);
-  }
+  });
 };
 
 const printBarChart = arr => {
@@ -295,7 +301,7 @@ const printBarChart = arr => {
 
 const displayGradesCount = arr => {
   const gradesCount = arr
-    .map(([name, grade, assignment]) => grade)
+    .map(([, grade, ,]) => grade)
     .reduce((map, grade) => {
       if (map.has(grade)) {
         map.set(grade, map.get(grade) + 1);
@@ -351,4 +357,3 @@ const convertUngraded = arr => {
 
 // RUN
 checkIfTokenExists();
-runPrompt();
