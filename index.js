@@ -4,6 +4,7 @@ import { google } from 'googleapis';
 import axios from 'axios';
 import inquirer from 'inquirer';
 import wunderbar from '@gribnoysup/wunderbar';
+import handle from './utils/handle';
 import {
   email,
   password,
@@ -26,42 +27,44 @@ import {
 const params = {};
 
 const runPrompt = async () => {
-  try {
-    const {
-      doChoice,
-      assignmentChoice,
-      sheetChoice,
-      selectionChoice
-    } = await inquirer.prompt(prompt);
+  const [promptErr, promptSuccess] = await handle(inquirer.prompt(prompt));
 
-    params.selectionRange = `${sheetChoice}!${selectionChoice}`;
+  if (promptErr) {
+    return console.log(promptErr);
+  }
 
-    params.homeworkTitle = assignmentChoice;
+  const {
+    doChoice,
+    assignmentChoice,
+    selectionChoice,
+    sheetChoice
+  } = promptSuccess;
 
-    switch (doChoice) {
-      case 'Get A Token From Google':
-        verify(tokenCreated);
-        break;
-      case 'Get Course IDs':
-        getCourseIds();
-        break;
-      case 'Display Grades From BCS':
-        displayGrades();
-        break;
-      case 'Read from Google Sheets':
-        verify(readGradesFromSheet);
-        break;
-      case 'Write To Google Sheets':
-        verify(writeGradesToSheet);
-        break;
-      case 'Quit':
-        process.exit();
-        break;
-      default:
-        console.log('Something went wrong. Oops.');
-    }
-  } catch (err) {
-    console.log(err);
+  params.selectionRange = `${sheetChoice}!${selectionChoice}`;
+
+  params.homeworkTitle = assignmentChoice;
+
+  switch (doChoice) {
+    case 'Get A Token From Google':
+      verify(tokenCreated);
+      break;
+    case 'Get Course IDs':
+      getCourseIds();
+      break;
+    case 'Display Grades From BCS':
+      displayGrades();
+      break;
+    case 'Read from Google Sheets':
+      verify(readGradesFromSheet);
+      break;
+    case 'Write To Google Sheets':
+      verify(writeGradesToSheet);
+      break;
+    case 'Quit':
+      process.exit();
+      break;
+    default:
+      console.log('Something went wrong. Oops.');
   }
 };
 
@@ -78,24 +81,33 @@ const tokenCreated = () =>
 
 // request an authToken from BCS
 const login = async () => {
-  try {
-    const response = await axios.post(loginEndpoint, {
+  const [loginErr, loginSuccess] = await handle(
+    axios.post(loginEndpoint, {
       email,
       password
-    });
-    const { authToken } = response.data.authenticationInfo;
-    return authToken;
-  } catch (err) {
-    console.log(err);
+    })
+  );
+
+  if (loginErr) {
+    return console.log(loginErr);
   }
+
+  const { authToken } = loginSuccess.data.authenticationInfo;
+  return authToken;
 };
 
 const getCourseIds = async () => {
-  const authToken = await login();
+  const [authTokenErr, authTokenSuccess] = await handle(login());
+
+  if (authTokenErr) {
+    return console.log(authTokenErr);
+  }
+
+  const authToken = authTokenSuccess;
   console.log(`BCS AUTH TOKEN: ${authToken}\n`);
 
-  try {
-    const response = await axios.post(
+  const [userDataErr, userDataSuccess] = await handle(
+    axios.post(
       userEndpoint,
       {},
       {
@@ -103,35 +115,43 @@ const getCourseIds = async () => {
           authToken
         }
       }
-    );
-    // filter from
-    const { userAccount, enrollments } = response.data;
+    )
+  );
 
-    console.log(`ID: ${userAccount.id}`);
-    console.log(`Name: ${userAccount.firstName} ${userAccount.lastName}`);
-    console.log(`Username: ${userAccount.userName}`);
-
-    const courses = enrollments.map(({ course }) => ({
-      courseId: course.id,
-      name: course.name,
-      startDate: course.startDate,
-      endDate: course.endDate
-    }));
-    console.log(`\ncourse id can be put into the .env file for setup\n`);
-    console.table(courses);
-    runPrompt();
-  } catch (err) {
-    console.log(err);
+  if (userDataErr) {
+    return console.log(userDataErr);
   }
+  // filter from
+  const { userAccount, enrollments } = userDataSuccess.data;
+
+  console.log(`ID: ${userAccount.id}`);
+  console.log(`Name: ${userAccount.firstName} ${userAccount.lastName}`);
+  console.log(`Username: ${userAccount.userName}`);
+
+  const courses = enrollments.map(({ course }) => ({
+    courseId: course.id,
+    name: course.name,
+    startDate: course.startDate,
+    endDate: course.endDate
+  }));
+  console.log(`\ncourse id can be put into the .env file for setup\n`);
+  console.table(courses);
+  runPrompt();
 };
 
 // await token and request grades for specific class via courseId
 const getGrades = async () => {
-  const authToken = await login();
-  console.log(`BCS AUTH TOKEN: ${authToken}`);
+  const [authTokenErr, authTokenSuccess] = await handle(login());
 
-  try {
-    const response = await axios.post(
+  if (authTokenErr) {
+    return console.log(authTokenErr);
+  }
+
+  const authToken = authTokenSuccess;
+  console.log(`BCS AUTH TOKEN: ${authToken}\n`);
+
+  const [getGradesErr, getGradesSuccess] = await handle(
+    axios.post(
       gradesEndpoint,
       {
         courseId
@@ -141,42 +161,48 @@ const getGrades = async () => {
           authToken
         }
       }
-    );
-    // filter from
-    const { data } = response;
-    const grades = data
-      .filter(({ assignmentTitle }) => params.homeworkTitle === assignmentTitle)
-      .map(({ studentName, grade, assignmentTitle, submitted }) => {
-        if (!submitted) {
-          return [studentName, 'Unsubmitted', assignmentTitle];
-        }
-        return [studentName, grade, assignmentTitle];
-      });
+    )
+  );
 
-    return grades;
-  } catch (err) {
-    console.log(err);
+  if (getGradesErr) {
+    return console.log(getGradesErr);
   }
+  // filter from
+  const { data } = getGradesSuccess;
+  const grades = data
+    .filter(({ assignmentTitle }) => params.homeworkTitle === assignmentTitle)
+    .map(({ studentName, grade, assignmentTitle, submitted }) => {
+      if (!submitted) {
+        return [studentName, 'Unsubmitted', assignmentTitle];
+      }
+      return [studentName, grade, assignmentTitle];
+    });
+
+  return grades;
 };
 
 const displayGrades = async () => {
-  try {
-    const grades = await getGrades();
-    console.log(`Selected Homework: ${params.homeworkTitle}`);
-    const rows = convertUngraded(grades);
-    console.log(`\n Rows: ${rows.length}`);
-    console.log(table(rows, readConfig));
-    displayGradesCount(rows);
-    displayGroupByGrade(rows);
-    runPrompt();
-  } catch (err) {
-    console.log(err);
+  const [gradesErr, grades] = await handle(getGrades());
+
+  if (gradesErr) {
+    return console.log(gradesErr);
   }
+
+  console.log(`Selected Homework: ${params.homeworkTitle}`);
+  const rows = convertUngraded(grades);
+  console.log(`\n Rows: ${rows.length}`);
+  console.log(table(rows, readConfig));
+  displayGradesCount(rows);
+  displayGroupByGrade(rows);
+  runPrompt();
 };
 
 const writeGradesToSheet = async auth => {
-  const grades = await getGrades();
+  const [gradesErr, grades] = await handle(getGrades());
 
+  if (gradesErr) {
+    return console.log(gradesErr);
+  }
   const header = ['Student Name', 'Grade', 'Assignment'];
   grades.unshift(header);
   // define sheet options here
