@@ -52,7 +52,9 @@ const runPrompt = async () => {
         .catch(err => console.log(err));
       break;
     case 'Display Grades From BCS':
-      displayGrades();
+      displayGrades()
+        .then(() => runPrompt())
+        .catch(err => console.log(err));
       break;
     case 'Read from Google Sheets':
       verify(readGradesFromSheet);
@@ -89,7 +91,8 @@ const login = async (email, password) => {
   );
 
   if (loginErr) {
-    return console.log(loginErr);
+    console.log(`  API Error`);
+    return console.log(loginErr.message);
   }
 
   const { authToken } = loginSuccess.data.authenticationInfo;
@@ -100,6 +103,7 @@ const getCourseIds = async (email, password) => {
   const [authTokenErr, authTokenSuccess] = await handle(login(email, password));
 
   if (authTokenErr) {
+    console.log(`Your BCS login info is most likely incorrect.`);
     return console.log(authTokenErr);
   }
 
@@ -119,7 +123,8 @@ const getCourseIds = async (email, password) => {
   );
 
   if (userDataErr) {
-    return console.log(userDataErr);
+    console.log(`  API Error`);
+    return console.log(userDataErr.message);
   }
   // filter from
   const { userAccount, enrollments } = userDataSuccess.data;
@@ -164,6 +169,7 @@ const getGrades = async () => {
   );
 
   if (getGradesErr) {
+    console.log(`  API Error`);
     return console.log(getGradesErr);
   }
   // filter from
@@ -187,13 +193,12 @@ const displayGrades = async () => {
     return console.log(gradesErr);
   }
 
-  console.log(`Selected Homework: ${params.homeworkTitle}`);
+  console.log(`  Selected Homework: ${params.homeworkTitle}`);
   const rows = convertUngraded(grades);
-  console.log(`\n Rows: ${rows.length}`);
+  console.log(`\n  Rows: ${rows.length}`);
   console.log(table(rows, readConfig));
   displayGradesCount(rows);
   displayGroupByGrade(rows);
-  runPrompt();
 };
 
 const writeGradesToSheet = async auth => {
@@ -262,30 +267,6 @@ const readGradesFromSheet = auth => {
       }
     }
   );
-};
-
-const checkIfTokenExists = () => {
-  fs.access(TOKEN_PATH, fs.F_OK, err => {
-    if (err) {
-      console.log(
-        `  token.json doesn't exist, please select 'Get A Token From Google to continue.\n`
-      );
-      console.log(
-        `  You can also get the course ids for your classes by selecting 'Get Course IDs'.\n`
-      );
-      prompt[0].choices = [
-        prompt[0].choices[0],
-        prompt[0].choices[1],
-        prompt[0].choices[2],
-        prompt[0].choices[5]
-      ];
-      runPrompt();
-    } else {
-      //file exists
-      prompt[0].choices.shift();
-      runPrompt();
-    }
-  });
 };
 
 const printBarChart = arr => {
@@ -358,6 +339,30 @@ const convertUngraded = arr => {
   return rows;
 };
 
+const checkIfTokenExists = () => {
+  fs.access(TOKEN_PATH, fs.F_OK, err => {
+    if (err) {
+      console.log(
+        `  token.json doesn't exist, please select 'Get A Token From Google to continue.\n`
+      );
+      console.log(
+        `  You can also get the course ids for your classes by selecting 'Get Course IDs'.\n`
+      );
+      prompt[0].choices = [
+        prompt[0].choices[0],
+        prompt[0].choices[1],
+        prompt[0].choices[2],
+        prompt[0].choices[5]
+      ];
+      runPrompt();
+    } else {
+      //file exists
+      prompt[0].choices.shift();
+      runPrompt();
+    }
+  });
+};
+
 const createEnv = async () => {
   const [err, answers] = await handle(inquirer.prompt(envPrompt));
 
@@ -365,7 +370,7 @@ const createEnv = async () => {
     return console.log(err);
   }
 
-  const { password, sheet, email } = answers;
+  const { email, password, sheet } = answers;
 
   getCourseIds(email, password)
     .then(async () => {
@@ -378,20 +383,35 @@ const createEnv = async () => {
       }
 
       const { course } = enterIdSuccess;
+      const content = `EMAIL=${email}\nBCS_PASSWORD=${password}\nSHEET=${sheet}\nCOURSE=${course}`;
 
-      const content = `BCS_PASSWORD=${password}
-SHEET=${sheet}
-COURSE=${course}
-EMAIL=${email}`;
-      fs.writeFile('.env', content, err => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        console.log('.env file created, run npm start again.');
-      });
+      const [confirmErr, confirm] = await handle(
+        inquirer.prompt({
+          type: 'confirm',
+          name: 'confirmInput',
+          message: `Is this data correct? \n${content}\n`
+        })
+      );
+
+      if (confirmErr) {
+        return console.log(confirmErr);
+      }
+
+      const { confirmInput } = confirm;
+
+      if (confirmInput) {
+        fs.writeFile('.env', content, err => {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          console.log('.env file created, run npm start again.');
+        });
+      } else {
+        createEnv();
+      }
     })
-    .catch(err => console.log(err));
+    .catch(err => console.log(err.message));
 };
 
 const checkEnv = () => {
@@ -408,6 +428,3 @@ const checkEnv = () => {
 };
 
 checkEnv();
-
-// RUN
-// checkIfTokenExists();

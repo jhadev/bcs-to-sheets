@@ -25,7 +25,7 @@ If you want to run through the process again, you can delete the .env file.
 
 5. Run npm again start from the root of the project.
 
-   - You should see an inquirer prompt, select the option to 'Get A Token From Google'
+   - You should see an inquirer prompt, select the option to **'Get A Token From Google'**
    - Follow the instructions printed on the command line.
 
      **The app isn't verified warning.**
@@ -34,7 +34,7 @@ If you want to run through the process again, you can delete the .env file.
 
    - You should receive a code from google to paste back into the command line.
    - If successful, 'token.json' will be created in the root of the project.
-   - DO NOT DELETE THIS FILE - unless you want to get a new token for some reason.
+   - **DO NOT DELETE THIS FILE** - unless you want to get a new token for some reason.
 
 Once you have 'token.json' in your project you now have read/write access for Google Sheets.
 
