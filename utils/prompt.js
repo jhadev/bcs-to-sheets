@@ -26,7 +26,7 @@ const prompt = [
   {
     type: 'input',
     name: 'selectionChoice',
-    message: 'Enter your sheet selection range in this format - A1:C',
+    message: 'Enter your sheet selection range in this format (3 columns) - A1:C',
     validate: input => (typeof input === 'string' ? true : false),
     when: answer =>
       answer.doChoice === 'Read from Google Sheets' ||

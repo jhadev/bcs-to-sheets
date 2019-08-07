@@ -405,7 +405,7 @@ const createEnv = async () => {
             console.error(err);
             return;
           }
-          console.log('.env file created, run npm start again.');
+          console.log('  .env file created, run npm start again.');
         });
       } else {
         createEnv();
@@ -418,7 +418,7 @@ const checkEnv = () => {
   fs.access('.env', fs.F_OK, err => {
     if (err) {
       console.log(
-        `  .env file does not exist. follow the prompt to create it.`
+        `  .env file does not exist. Follow the prompt to create it.`
       );
       createEnv();
     } else {
