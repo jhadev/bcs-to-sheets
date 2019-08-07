@@ -26,7 +26,7 @@ const prompt = [
   {
     type: 'input',
     name: 'selectionChoice',
-    message: 'Enter your sheet selection range in this format - A1:C',
+    message: 'Enter your sheet selection range in this format (3 columns) - A1:C',
     validate: input => (typeof input === 'string' ? true : false),
     when: answer =>
       answer.doChoice === 'Read from Google Sheets' ||
@@ -43,4 +43,32 @@ const prompt = [
   }
 ];
 
-export default prompt;
+const envPrompt = [
+  {
+    type: 'input',
+    name: 'email',
+    message: 'Enter Your BCS Email Address',
+    validate: input => (typeof input === 'string' ? true : false)
+  },
+  {
+    type: 'input',
+    name: 'password',
+    message: 'Enter Your BCS Password',
+    validate: input => (typeof input === 'string' ? true : false)
+  },
+  {
+    type: 'input',
+    name: 'sheet',
+    message: 'Enter the Sheet Google Sheet ID',
+    validate: input => (typeof input === 'string' ? true : false)
+  }
+];
+
+const courseIdPrompt = {
+  type: 'input',
+  name: 'course',
+  message: 'Enter the Course ID for your cohort',
+  validate: input => (typeof input === 'string' ? true : false)
+};
+
+export { prompt, envPrompt, courseIdPrompt };

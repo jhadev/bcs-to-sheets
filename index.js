@@ -5,7 +5,7 @@ import axios from 'axios';
 import inquirer from 'inquirer';
 import wunderbar from '@gribnoysup/wunderbar';
 import handle from './utils/handle';
-import prompt from './utils/prompt';
+import { prompt, envPrompt, courseIdPrompt } from './utils/prompt';
 import { authorize } from './utils/auth';
 import { groupByGradeConfig, countConfig, readConfig } from './utils/tables';
 import {
@@ -47,10 +47,14 @@ const runPrompt = async () => {
       verify(tokenCreated);
       break;
     case 'Get Course IDs':
-      getCourseIds();
+      getCourseIds(EMAIL, PASSWORD)
+        .then(() => runPrompt())
+        .catch(err => console.log(err));
       break;
     case 'Display Grades From BCS':
-      displayGrades();
+      displayGrades()
+        .then(() => runPrompt())
+        .catch(err => console.log(err));
       break;
     case 'Read from Google Sheets':
       verify(readGradesFromSheet);
@@ -78,26 +82,28 @@ const tokenCreated = () =>
   console.log('token.json has been created. Run npm start again.');
 
 // request an authToken from BCS
-const login = async () => {
+const login = async (email, password) => {
   const [loginErr, loginSuccess] = await handle(
     axios.post(LOGIN_ENDPOINT, {
-      EMAIL,
-      PASSWORD
+      email,
+      password
     })
   );
 
   if (loginErr) {
-    return console.log(loginErr);
+    console.log(`  API Error`);
+    return console.log(loginErr.message);
   }
 
   const { authToken } = loginSuccess.data.authenticationInfo;
   return authToken;
 };
 
-const getCourseIds = async () => {
-  const [authTokenErr, authTokenSuccess] = await handle(login());
+const getCourseIds = async (email, password) => {
+  const [authTokenErr, authTokenSuccess] = await handle(login(email, password));
 
   if (authTokenErr) {
+    console.log(`Your BCS login info is most likely incorrect.`);
     return console.log(authTokenErr);
   }
 
@@ -117,7 +123,8 @@ const getCourseIds = async () => {
   );
 
   if (userDataErr) {
-    return console.log(userDataErr);
+    console.log(`  API Error`);
+    return console.log(userDataErr.message);
   }
   // filter from
   const { userAccount, enrollments } = userDataSuccess.data;
@@ -134,12 +141,11 @@ const getCourseIds = async () => {
   }));
   console.log(`\ncourse id can be put into the .env file for setup\n`);
   console.table(courses);
-  runPrompt();
 };
 
 // await token and request grades for specific class via courseId
 const getGrades = async () => {
-  const [authTokenErr, authTokenSuccess] = await handle(login());
+  const [authTokenErr, authTokenSuccess] = await handle(login(EMAIL, PASSWORD));
 
   if (authTokenErr) {
     return console.log(authTokenErr);
@@ -163,6 +169,7 @@ const getGrades = async () => {
   );
 
   if (getGradesErr) {
+    console.log(`  API Error`);
     return console.log(getGradesErr);
   }
   // filter from
@@ -186,13 +193,12 @@ const displayGrades = async () => {
     return console.log(gradesErr);
   }
 
-  console.log(`Selected Homework: ${params.homeworkTitle}`);
+  console.log(`  Selected Homework: ${params.homeworkTitle}`);
   const rows = convertUngraded(grades);
-  console.log(`\n Rows: ${rows.length}`);
+  console.log(`\n  Rows: ${rows.length}`);
   console.log(table(rows, readConfig));
   displayGradesCount(rows);
   displayGroupByGrade(rows);
-  runPrompt();
 };
 
 const writeGradesToSheet = async auth => {
@@ -219,6 +225,7 @@ const writeGradesToSheet = async auth => {
   // UPDATE WILL OVERWRITE EXISTING FIELDS BUT NOT CREATE NEW ROWS UNLESS THEY DO NOT EXIST.
   sheets.spreadsheets.values.update(options, (err, response) => {
     if (err) {
+      console.log(`  Check your Sheet ID and make sure it is correct.`);
       console.log(`The API returned an error: ${err}`);
       return;
     } else {
@@ -242,6 +249,7 @@ const readGradesFromSheet = auth => {
     },
     (err, response) => {
       if (err) {
+        console.log(`  Check your Sheet ID and make sure it is correct.`);
         return console.log(err.errors);
       }
       const { values } = response.data;
@@ -252,35 +260,13 @@ const readGradesFromSheet = auth => {
         console.log(table(rows, readConfig));
         displayGradesCount(rows);
         displayGroupByGrade(rows);
+        runPrompt();
       } else {
         console.log('No data found.');
+        runPrompt();
       }
-      runPrompt();
     }
   );
-};
-
-const checkIfTokenExists = () => {
-  fs.access(TOKEN_PATH, fs.F_OK, err => {
-    if (err) {
-      console.log(
-        `  token.json doesn't exist, please select 'Get A Token From Google to continue.\n`
-      );
-      console.log(
-        `  You can also get the course ids for your classes by selecting 'Get Course IDs'.\n`
-      );
-      prompt[0].choices = [
-        prompt[0].choices[0],
-        prompt[0].choices[1],
-        prompt[0].choices[5]
-      ];
-      runPrompt();
-    } else {
-      //file exists
-      prompt[0].choices.shift();
-      runPrompt();
-    }
-  });
 };
 
 const printBarChart = arr => {
@@ -353,5 +339,92 @@ const convertUngraded = arr => {
   return rows;
 };
 
-// RUN
-checkIfTokenExists();
+const checkIfTokenExists = () => {
+  fs.access(TOKEN_PATH, fs.F_OK, err => {
+    if (err) {
+      console.log(
+        `  token.json doesn't exist, please select 'Get A Token From Google to continue.\n`
+      );
+      console.log(
+        `  You can also get the course ids for your classes by selecting 'Get Course IDs'.\n`
+      );
+      prompt[0].choices = [
+        prompt[0].choices[0],
+        prompt[0].choices[1],
+        prompt[0].choices[2],
+        prompt[0].choices[5]
+      ];
+      runPrompt();
+    } else {
+      //file exists
+      prompt[0].choices.shift();
+      runPrompt();
+    }
+  });
+};
+
+const createEnv = async () => {
+  const [err, answers] = await handle(inquirer.prompt(envPrompt));
+
+  if (err) {
+    return console.log(err);
+  }
+
+  const { email, password, sheet } = answers;
+
+  getCourseIds(email, password)
+    .then(async () => {
+      const [enterIdErr, enterIdSuccess] = await handle(
+        inquirer.prompt(courseIdPrompt)
+      );
+
+      if (enterIdErr) {
+        return console.log(enterIdErr);
+      }
+
+      const { course } = enterIdSuccess;
+      const content = `EMAIL=${email}\nBCS_PASSWORD=${password}\nSHEET=${sheet}\nCOURSE=${course}`;
+
+      const [confirmErr, confirm] = await handle(
+        inquirer.prompt({
+          type: 'confirm',
+          name: 'confirmInput',
+          message: `Is this data correct? \n${content}\n`
+        })
+      );
+
+      if (confirmErr) {
+        return console.log(confirmErr);
+      }
+
+      const { confirmInput } = confirm;
+
+      if (confirmInput) {
+        fs.writeFile('.env', content, err => {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          console.log('  .env file created, run npm start again.');
+        });
+      } else {
+        createEnv();
+      }
+    })
+    .catch(err => console.log(err.message));
+};
+
+const checkEnv = () => {
+  fs.access('.env', fs.F_OK, err => {
+    if (err) {
+      console.log(
+        `  .env file does not exist. Follow the prompt to create it.`
+      );
+      createEnv();
+    } else {
+      checkIfTokenExists();
+    }
+  });
+};
+
+checkEnv();
