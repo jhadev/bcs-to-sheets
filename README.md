@@ -14,14 +14,7 @@ Navigate to Google Sheets API [reference page](https://developers.google.com/she
 
 4. Run npm start from the root of the project. Follow the prompts to create a .env file. Once you put in your Email, Password, and Google Sheet ID in the prompt it will fetch a list of your cohorts. Type in the courseId for the course you want to track and you are all set.
 
-<<<<<<< HEAD
-   - EMAIL=_Your Bootcampspot email_
-   - BCS_PASSWORD=Your Bootcampspot password
-   - SHEET=_Google Sheet ID ex: sj7r-LuSE8mbV6lktPgmW7KUbbdlpeEIi0I1lUsSBgo (Can be found in sheet url)_
-   - COURSE=_Course ID Number (Found in BCS API call usually a 4 digit number)_
-=======
 It will create a .env file at the root of the project that looks like this:
->>>>>>> env
 
 - EMAIL=**Your Bootcampspot email**
 - BCS_PASSWORD=**Your Bootcampspot password**
